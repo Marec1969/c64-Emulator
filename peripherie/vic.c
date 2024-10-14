@@ -273,11 +273,21 @@ void drawSprite(void) {
                                         break;
                                         break;
                                     }                             
-                                    if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
+                                    if ((vicRegisters.sprite_double_width & mask) || (vicRegisters.sprite_double_height & mask)) {
                                         windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
-                                        windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
-                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
-                                        windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit + 1] = color;
+                                        if (vicRegisters.sprite_double_width & mask) {
+                                            windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;                                        
+                                            windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit +1] = color;                                        
+                                        }
+                                        if (vicRegisters.sprite_double_height & mask) {
+                                            windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;                                            
+                                            windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit+1] = color;                                            
+                                        }
+                                        if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
+                                            windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                            windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit +1] = color;
+                                        }
                                     } else {
                                         windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit] = color;
                                         windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit+1] = color;
@@ -288,12 +298,17 @@ void drawSprite(void) {
                         } else {
                             for (int bit=0;bit<8;bit++) {
                                 if (val & bitMask)  {
-                                    // printf("%d %d\n",spriteY,spriteX);
-                                    if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
+                                    if ((vicRegisters.sprite_double_width & mask) || (vicRegisters.sprite_double_height & mask)) {
                                         windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
-                                        windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
-                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
-                                        windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                        if (vicRegisters.sprite_double_width & mask) {
+                                            windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;                                        
+                                        }
+                                        if (vicRegisters.sprite_double_height & mask) {
+                                            windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;                                            
+                                        }
+                                        if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
+                                            windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                        }
                                     } else {
                                         windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit] = color;
                                     }
