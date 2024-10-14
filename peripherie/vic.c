@@ -240,25 +240,66 @@ void drawSprite(void) {
             if (vicRegisters.sprite_enable & mask ) {
                 spritePtr = memory[screenAddr+0x400-8+i] * 64;
                 spriteX = vicRegisters.spritePos[i*2];
+                if (vicRegisters.sprite_x_msb & mask) {
+                    spriteX += 256;
+                } 
                 spriteY = vicRegisters.spritePos[i*2+1];
                 color = vicRegisters.sprite_color[i];
                 for (int y=0;y<21;y++) {
                     for (int x=0;x<3;x++) {
-                        bitMask=0x80;
+                        bitMask=0xc0;
                         val = memory[bankOfset + spritePtr++];
-                        for (int bit=0;bit<8;bit++) {
-                            if (val & bitMask)  {
-                                // printf("%d %d\n",spriteY,spriteX);
-                                if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
-                                    windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
-                                    windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
-                                    windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
-                                    windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
-                                } else {
-                                    windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit] = color;
+                        if (vicRegisters.sprite_multicolor& mask ) {
+                            for (int bit=0;bit<8;bit+=2) {
+                                if (val & bitMask)  {       
+                                    switch(val & bitMask) {
+                                        case 0xc0:
+                                        case 0x30:
+                                        case 0x0c:
+                                        case 0x03:
+                                                    color = vicRegisters.sprite_color[i];
+                                            break;
+                                        case 0x80:
+                                        case 0x20:
+                                        case 0x08:
+                                        case 0x02:
+                                                    color = vicRegisters.sprite_multicolor0;
+                                        break;
+                                        case 0x40:
+                                        case 0x10:
+                                        case 0x04:
+                                        case 0x01:
+                                                    color = vicRegisters.sprite_multicolor1;
+                                        break;
+                                        break;
+                                    }                             
+                                    if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
+                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                    } else {
+                                        windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit] = color;
+                                        windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit+1] = color;
+                                    }
                                 }
+                                bitMask  >>=2;
                             }
-                            bitMask  >>=1;
+                        } else {
+                            for (int bit=0;bit<8;bit++) {
+                                if (val & bitMask)  {
+                                    // printf("%d %d\n",spriteY,spriteX);
+                                    if ((vicRegisters.sprite_double_width & mask) && (vicRegisters.sprite_double_height & mask)) {
+                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 + 1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                        windowsScreen[spriteY + y*2 +1 -  OFFSE_Y][OFFSE_X + spriteX + x*16 + 1 + 2*bit] = color;
+                                    } else {
+                                        windowsScreen[spriteY + y -  OFFSE_Y][OFFSE_X + spriteX + x*8 + bit] = color;
+                                    }
+                                }
+                                bitMask  >>=1;
+                            }
                         }
                     }
                 }
