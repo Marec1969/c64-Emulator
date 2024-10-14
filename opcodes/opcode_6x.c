@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "cpu6510.h"
+#include "functions.h"
+
+// RTS (Return from Subroutine)
+void OPCODE_60(void) {
+    cpu.PC = pop_stack16() + 1;  // Rücksprungadresse vom Stack holen und 1 addieren
+}
+
+void OPCODE_61(void) {
+    // ADC (Indirect,X)
+    uint16_t addr = addrIndirectX(); // Berechne die indirekte Adresse
+    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    ADC_A(value); // Führe die Addition durch
+    cpu.PC++;
+}
+
+// ADC Zero Page
+void OPCODE_65(void) {
+    uint16_t addr = addrZeropage(); // Lese Zero-Page-Adresse
+    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    ADC_A(value); // Führe die Addition durch
+    cpu.PC++;
+}
+
+// ROR Zero Page
+void OPCODE_66(void) {
+    uint16_t addr = addrZeropage(); // Lese die Adresse aus dem Zero Page
+    uint8_t value = read_memory(addr); // Lese den Wert von der Adresse
+    value = ROR(value); // Führe ROR (Rotate Right) durch
+    write_memory(addr, value); // Schreibe den neuen Wert zurück
+    cpu.PC++;
+}
+
+// PLA (Pull Accumulator)
+void OPCODE_68(void) {
+    cpu.A = pop_stack8();  // Wert vom Stack in den Akkumulator holen
+    set_flag(FLAG_ZERO, cpu.A == 0);
+    set_flag(FLAG_NEGATIVE, cpu.A & 0x80);
+    cpu.PC++; // toDo: flages sind nich beeiflusst ???
+}
+
+// ADC Immediate
+void OPCODE_69(void) {
+    uint16_t addr = addrImmediate();
+    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    ADC_A(value); // Führe die Addition durch
+    cpu.PC++;
+}
+
+// ROR Accumulator
+void OPCODE_6A(void) {
+    cpu.A = ROR(cpu.A); // ROR (Rotate Right) durch den Akkumulator
+    cpu.PC++;
+}
+
+// JMP (Indirect)
+void OPCODE_6C(void) {
+    uint16_t addr = addrIndirect(); // Lese die indirekte Adresse
+    cpu.PC = addr; // Setze die Program Counter auf die neue Adresse
+}
+
+// ADC Absolute
+void OPCODE_6D(void) {
+    uint16_t addr = addrAbsulut(); // Lese die absolute Adresse
+    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    ADC_A(value); // Führe die Addition durch
+    cpu.PC++;
+}
+
+// ROR Absolute
+void OPCODE_6E(void) {
+    uint16_t addr = addrAbsulut(); // Lese die absolute Adresse
+    uint8_t value = read_memory(addr); // Lese den Wert von der Adresse
+    value = ROR(value); // Führe ROR (Rotate Right) durch
+    write_memory(addr, value); // Schreibe den neuen Wert zurück
+    cpu.PC++;
+}
+
+// RRA Absolute (Illegal Opcode)
+void OPCODE_6F(void) {
+    uint16_t addr = addrAbsulut(); // Lese die absolute Adresse
+    uint8_t value = read_memory(addr); // Lese den Wert von der Adresse
+    uint8_t temp = value >> 1; // Halbiere den Wert
+    ADC_A(temp); // Addiere den Wert mit dem Akkumulator
+    write_memory(addr, temp); // Schreibe den neuen Wert zurück
+    cpu.PC++;
+}

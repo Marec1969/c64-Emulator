@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "cpu6510.h"
+#include "functions.h"
+
+void OPCODE_50(void) {
+    // BVC (Branch if Overflow Clear)
+    cpu.PC++; // Inkrementiere PC
+    if (!(cpu.SR & FLAG_OVERFLOW)) {
+        cpu.PC += (int8_t)read_memory(cpu.PC); // Berechne den Offset für den Sprung
+        cpu.PC++;
+  } else {
+      cpu.PC++;
+    }
+
+}
+
+void OPCODE_51(void) {
+    // EOR (Indirect),Y
+    uint16_t addr = addrIndirect_Y(); // Lese die indirekte Adresse und addiere Y
+    EOR_A(read_memory(addr)); // XOR mit dem Wert von der berechneten Adresse
+    cpu.PC++;
+}
+
+void OPCODE_55(void) {
+    // EOR Zero Page,X
+    uint16_t addr = addrZeropageX(); // Berechne Zero-Page-Adresse mit X-Offset
+    EOR_A(read_memory(addr)); // Führe bitweises XOR durch
+    cpu.PC++;
+}
+
+void OPCODE_56(void) {
+    // LSR Zero Page,X
+    uint16_t addr = addrZeropageX(); // Berechne Zero-Page-Adresse mit X-Offset
+    uint8_t value = read_memory(addr); // Lese den Wert
+    value = LSR(value); // Führe logisches Shift-Right durch
+    write_memory(addr, value); // Schreibe neuen Wert zurück
+    cpu.PC++;
+
+}
+
+void OPCODE_57(void) {
+    // ROR Zero Page,Y
+    uint16_t addr = addrZeropageY(); // Berechne Zero-Page-Adresse mit Y-Offset
+    uint8_t value = read_memory(addr); // Lese den Wert
+    value = ROR(value); // Führe ROR (Rotate Right) durch
+    write_memory(addr, value); // Schreibe neuen Wert zurück
+    cpu.PC++;
+}
+
+void OPCODE_58(void) {
+    // SEI (Set Interrupt Enable)
+    cpu.SR &= ~FLAG_INTERRUPT; // resetze Interrupt-Disable-Flag
+    cpu.PC++;
+}
+
+
+void OPCODE_5D(void) {
+    // EOR Absolute,X
+    uint16_t addr = addrAbsulutX(); // Lese die absolute Adresse und addiere X
+    EOR_A(read_memory(addr)); // Führe bitweises XOR durch
+    cpu.PC++;
+}
+
+void OPCODE_5E(void) {
+    // LSR Absolute,X
+    uint16_t addr = addrAbsulutX(); // Lese die absolute Adresse und addiere X
+    uint8_t value = read_memory(addr); // Lese den Wert
+    value = LSR(value); // Führe logisches Shift-Right durch
+    write_memory(addr, value); // Schreibe neuen Wert zurück
+    cpu.PC++;
+}
+
+void OPCODE_5A(void) {
+    cpu.PC++;
+}
