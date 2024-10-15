@@ -50,6 +50,9 @@
 // 6567R8	    NTSC-M	        263	            235	                65	            418
 // 6569	        PAL-B	        312	            284             	63	            403
 
+#define PAL_B_Y	  284
+#define PAL_B_X   404
+
 // Typ	            Erste   Letzte          Erste X-Koo.    Erste sichtbare     Letzte sichtbare
 //          V-Blank-Zeile	V-Blank-Zeile	einer Zeile     X-Koordinate        X-Koordinate
 //6567R56A	        13	        40	            412 ($19c)	    488 ($1e8)      	388 ($184)
@@ -60,6 +63,12 @@
 // der aber nicht mit der X-Koordinate 0 zusammenfällt, sondern mit der unter „Erste X-Koo. 
 // einer Zeile” angegebenen. Die X-Koordinaten laufen innerhalb der Zeile bis $1ff (beim 6569 nur bis $1f7),
 // dann erst kommt X-Koordinate 0. 
+
+#define BR_LEFT   ((404-320)/2)
+#define BR_TOP    ((284-200)/2)
+#define BR_RIGHT  (404-BR_LEFT)
+#define BR_BOTTOM (284 - BR_TOP) 
+
 
 
 // #define VIC_LINES_CNT   312

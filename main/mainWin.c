@@ -6,11 +6,6 @@
 #include <windows.h>
 
 #include "vic.h"
-#include "cpurunner.h"
-#include "cpu6510.h"
-
-#include "cia.h"
-#include "keymap.h"
 
 #include "cpu_cnt.h"
 #include "main.h"
@@ -72,7 +67,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
         if (canvas) {
-            SetDIBitsToDevice(hdc, 0, 0,  400, 300, 0, 0, 0, 300, canvas, bmi, DIB_RGB_COLORS);          
+            SetDIBitsToDevice(hdc, 0, 0,  PAL_B_X, PAL_B_Y, 0, 0, 0, PAL_B_Y, canvas, bmi, DIB_RGB_COLORS);          
         }
         EndPaint(hwnd, &ps);    
     break;
@@ -108,8 +103,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 void initBMI() {
     ZeroMemory(&bmiColor, sizeof(BITMAPINFO_16COLORS));
     bmiColor.bmiHeader.biSize     = sizeof(BITMAPINFOHEADER);
-    bmiColor.bmiHeader.biWidth = 400;
-    bmiColor.bmiHeader.biHeight = -300; // Negative Höhe für Top-Down Bitmap
+    bmiColor.bmiHeader.biWidth = PAL_B_X;
+    bmiColor.bmiHeader.biHeight = -PAL_B_Y; // Negative Höhe für Top-Down Bitmap
     bmiColor.bmiHeader.biPlanes = 1;
     bmiColor.bmiHeader.biBitCount = 8; // 24 Bit für RGB
     bmiColor.bmiHeader.biCompression = BI_RGB;
@@ -123,6 +118,7 @@ void initBMI() {
 
 }
 
+#if 0
 
 // Hauptfunktion
 int runMainWindow(void) {
@@ -175,3 +171,73 @@ int runMainWindow(void) {
     return 0;
 }
 
+#endif
+// Hauptfunktion
+int runMainWindow(void) {
+    // Fensterklassenstruktur initialisieren
+    const char CLASS_NAME[] = "SimpleWindowClass";
+
+    WNDCLASS wc = { 0 };
+
+    // prepareAllBitmaps();
+
+    wc.lpfnWndProc = WindowProc; // Fensterprozedur
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = CLASS_NAME;
+
+    // Fensterklasse registrieren
+    RegisterClass(&wc);
+
+    initBMI();
+
+    // Zielgröße der Client Area
+    int desiredWidth = PAL_B_X;
+    int desiredHeight = PAL_B_Y;
+
+    // Struktur, um die Größe des Fensters zu speichern
+    RECT windowRect = { 0, 0, desiredWidth, desiredHeight };
+
+    // Berechne die äußere Fenstergröße, basierend auf der gewünschten Clientgröße
+    AdjustWindowRectEx(
+        &windowRect,          // RECT, der die gewünschte Größe und Position enthält
+        WS_OVERLAPPEDWINDOW,  // Fensterstil (muss derselbe wie bei CreateWindowEx sein)
+        FALSE,                // Hat das Fenster ein Menü?
+        0                     // Erweiterter Fensterstil (muss derselbe wie bei CreateWindowEx sein)
+    );
+
+    // Berechnete Breite und Höhe des gesamten Fensters
+    int adjustedWidth = windowRect.right - windowRect.left;
+    int adjustedHeight = windowRect.bottom - windowRect.top;
+
+    // Ein Fenster erstellen mit den berechneten Werten für die Breite und Höhe
+    HWND hwnd = CreateWindowEx(
+        0,                              // Erweiterter Fensterstil
+        CLASS_NAME,                     // Fensterklasse
+        "Simple Graphics Window",        // Fenstertitel
+        WS_OVERLAPPEDWINDOW,            // Fensterstil
+        CW_USEDEFAULT, CW_USEDEFAULT,    // Anfangsposition
+        adjustedWidth, adjustedHeight,   // Berechnete Breite und Höhe
+        NULL,                           // Übergeordnetes Fenster
+        NULL,                           // Menü
+        wc.hInstance,                   // Instanzhandle
+        NULL                            // Zusätzliche anwendungsspezifische Daten
+    );
+
+    if (hwnd == NULL) {
+        return 0;
+    }
+
+    windowHandle = hwnd;
+
+    // Fenster anzeigen
+    ShowWindow(hwnd, SW_SHOW);
+
+    // Nachrichten-Schleife
+    MSG msg = { 0 };
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return 0;
+}
