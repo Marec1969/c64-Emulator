@@ -171,9 +171,7 @@ int runMainWindow(void) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
-    // printf("Windowupdate = %d   vic update = %d\n",update,vicUpdateCnt);
-
+     
     return 0;
 }
 

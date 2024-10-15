@@ -74,8 +74,8 @@ void write_vic_registers_to_file(void) {
 
     // Sprite X/Y Positions (D000 - D00F)
     for (int i=0;i<8;i++) {
-      fprintf(file, "%04X\tSprite %d X-Position\t%d\n",0xd000 + i*2,i, regs->spritePos[i*2]);
-      fprintf(file, "%04X\tSprite %d Y-Position\t%d\n\n",0xd001 + i*2,i, regs->spritePos[i*2+1]);
+      fprintf(file, "%04X\tSprite %d X-Position\t%d\n",0xd000 + i*2,i, regs->spritePos[i][0]);
+      fprintf(file, "%04X\tSprite %d Y-Position\t%d\n\n",0xd001 + i*2,i, regs->spritePos[i][1]);
     } 
 
     // $D010: X-Position MSB for all Sprites

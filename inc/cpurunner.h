@@ -1,5 +1,3 @@
-#ifndef CPURUNNER_H
-#define CPURUNNER_H
 
 #ifdef DOINCLUDE_CPUDATA
 #include "opcodes.h"
@@ -162,6 +160,10 @@ OPCODE_func jumptable[256] = {
     /* 0xFC */ OPCODE_FC, /* 0xFD */ OPCODE_FD, /* 0xFE */ OPCODE_FE, /* 0xFF */ OPCODE_FF,
 };
 #endif
+
+#ifndef CPURUNNER_H
+#define CPURUNNER_H
+
 
 void cpuRunnerInit(void);
 void cpuRunnerDo(void);

@@ -8,7 +8,7 @@ include_directories(${PROJECT_SOURCE_DIR}/inc)
 file(GLOB SOURCES "main/*.c" "peripherie/*.c" "test/*.c" "opcodes/*.c" "debug/*.c")
 
 # Setze die C-Optimierungsflags für die Release-Konfiguration
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
 
 # Die ausführbare Datei mit den gesammelten Dateien erstellen
 add_executable(c64 ${SOURCES})

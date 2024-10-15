@@ -14,20 +14,22 @@
 #include "prom.h"
 #include "cpu6510.h"
 
-#include "vic.h"
-#include "cia.h"
-
 #define DOINCLUDE_CPUDATA
 #include "cpurunner.h"
 #undef DOINCLUDE_CPUDATA 
+
+#include "vic.h"
+#include "cia.h"
+#include "saveMemory.h"
+#include "main.h"
+
+extern uint64_t gesTsc;
 
 int run=0;
 
 uint8_t memory[MEMORY_SIZE];  // Speicher
 uint8_t rom[MEMORY_SIZE];  // Speicher
 CPU cpu;
-
-extern volatile int running;
 
 volatile int doIRQ=0;
 
@@ -54,76 +56,6 @@ void load_rom() {
     cpu.PC = (read_memory(0XFFFC) | (read_memory(0XFFFD) << 8));  // Reset Vector    
 }
 
-int saveMemory() {
-    // Datei öffnen (oder erstellen) im "w" Modus (write)
-    FILE *filePointer = fopen("memory.txt", "w");
-
-    // Überprüfen, ob die Datei erfolgreich geöffnet wurde
-    if (filePointer == NULL) {
-        printf("Fehler beim Erstellen der Datei.\n");
-        return 1;
-    }
-
-    fprintf(filePointer,"A %02x\t",cpu.A);
-    fprintf(filePointer,"X %02x\t",cpu.X);
-    fprintf(filePointer,"Y %02x\t",cpu.Y);
-
-    fprintf(filePointer,"SR %02x\t",cpu.SR);
-    fprintf(filePointer,"PC %04x\t",cpu.PC);
-
-
-
-    int cnt = 0x00;
-    while (cnt<0x10000) {
-        fprintf(filePointer,"\n%04x  ",cnt);
-        for (int j=0;j<32;j++) {
-            fprintf(filePointer,"%02x ",memory[cnt]);
-            cnt++;
-        }
-        fprintf(filePointer,"\t\t\t");
-        cnt -= 32;
-        for (int j=0;j<32;j++) {
-            if (memory[cnt]>31) {
-                fprintf(filePointer,"%c",memory[cnt]);
-            } else {
-                fprintf(filePointer," ");
-            }
-            cnt++;
-        }
-    } 
-    fprintf(filePointer,"\n\n\nColormap\n");
-    cnt = 0;
-    while (cnt<1000) {
-        fprintf(filePointer,"\n%04x  ",0xd800+cnt);
-        for (int j=0;j<32;j++) {
-            fprintf(filePointer,"%02x ",colormap[cnt]);
-            cnt++;
-        }
-        fprintf(filePointer,"\t\t\t");
-        cnt -= 32;
-        for (int j=0;j<32;j++) {
-            if (memory[cnt]>31) {
-                fprintf(filePointer,"%c",colormap[cnt]);
-            } else {
-                fprintf(filePointer," ");
-            }
-            cnt++;
-        }
-    } 
-
-
-    // Datei schließen
-    fclose(filePointer);
-
-    printf("Datei erfolgreich erstellt und geschrieben.\n");
-    
-    return 0;
-}
-
-
-#ifdef MEASURE_PERFORMANZE            
-
-#endif 
 
 void  cpuRunnerInit() {
     // CPU und Speicher initialisieren
@@ -134,7 +66,6 @@ void  cpuRunnerInit() {
     printf("Start Prog at %04X  %02x\r\n",cpu.PC,cpu.SR);
     run = 0;
 }
-
 
 
 void cpuRunnerDo(void) {
@@ -152,7 +83,7 @@ int irqCnt=0;
 
     QueryPerformanceFrequency(&frequency); // Frequenz des Hochleistungszählers
     QueryPerformanceCounter(&start); // Startzeitpunkt
-    uint64_t startTsc = rdtsc();
+    // uint64_t startTsc = rdtsc();
 #endif 
 
     while (1) {
@@ -165,15 +96,26 @@ int irqCnt=0;
        // delayCNT();
 
 
-        if (running==0) {
+        if (!mainRunning()) {
 #ifdef MEASURE_PERFORMANZE            
-            uint64_t endTsc = rdtsc();
+            // uint64_t endTsc = rdtsc();
             QueryPerformanceCounter(&end); // Endzeitpunkt
-            printf("TSC-Differenz: %3.3f Zyklen\n", (double)(endTsc - startTsc)*0.4e-9);
+            // printf("TSC-Differenz: %3.3f Zyklen\n", (double)(endTsc - startTsc)*0.4e-9);
             double elapsed = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
             printf("Zeit: %3.2f Sekunden\n", elapsed);
 #endif 
+
+            printf("TSC-Differenz: %3.3f Zyklen\n", (double)(gesTsc)*0.4e-9);
+
             printf("Ende at %d   time %3.2fS   irq Cnt=%d\r\n",run,(double)clkCount * 1e-6,irqCnt);
+
+            {
+                extern volatile int vicUpdateCnt;
+                extern volatile int update;
+                printf("Windowupdate = %d   vic update = %d\n",update,vicUpdateCnt);
+            }
+
+
             saveMemory();
             saveScreen();
             write_vic_registers_to_file();
@@ -191,7 +133,7 @@ int irqCnt=0;
 
         if(show) {
             show--;
-            if (show==0) running=0;
+            if (show==0) mainStop();
 //        if (run>600000) {
 //        if (cpu.SR & 0x08) {
             printf("%06d\t",run);

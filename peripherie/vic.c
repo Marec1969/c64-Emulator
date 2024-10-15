@@ -13,10 +13,8 @@
 #include "cia.h"
 
 #define INLUDE_KEYMAP
-#include "keymap.h"
 #include "mainWin.h"
 #include "cpu_cnt.h"
-#include "progloader.h"
 
 
 #define NUM_BITMAPS 256
@@ -31,18 +29,20 @@
 #define NUM_BGCOLORS 16
 
 
-extern volatile int running;
- 
-
 VIC_II_Registers vicRegisters;
 
-uint16_t screenAddr=0x0400;
+
 uint8_t colormap[1024];
 uint8_t windowsScreen[300][400];
 
 
 volatile int vicUpdateCnt=0;
 volatile int update=0;
+
+uint64_t gesTsc=0;
+
+static uint64_t endTsc = 0;
+static uint64_t startTsc = 0;
 
 
 void write_vic(uint16_t addr,uint8_t value) {
@@ -109,9 +109,10 @@ void drawGrid(void) {
     uint8_t bank = cia_getVidoeBank();
     uint16_t addr = ((vicRegisters.memory_control>>1) & 0x7)*0x0800;        
     uint16_t bankOfset;
+    uint16_t screenAddr;
 
     bankOfset = bank * 0x4000;
-    screenAddr = bankOfset + ((vicRegisters.memory_control>>4) & 0xf) * 0x0400;
+    screenAddr = bankOfset + ((vicRegisters.memory_control>>4) & 0xf) * SCREENSIZE_BYTE;
 
     if (((bank==0) || (bank==2)) && (addr == 0x1000)) {
         charBasePtr = &rom[CHAR_ROM_ADDR];
@@ -214,7 +215,181 @@ uint8_t brCol=vicRegisters.border_color;
     }
 }
 
+void updateSpriteLine(int16_t rasterPosY) {
+    int16_t spriteY;
+    int16_t spriteX;
+    int16_t distance;
+    int16_t sizeY;
+    int16_t sizeX;
+    int16_t doubleWidth;
+    int16_t doubleHight;
+    int16_t colorSprite;
+    uint16_t spritePtr;
+    uint8_t bank = cia_getVidoeBank();
+    uint16_t bankOfset;
+    uint16_t screenAddr;
 
+    // static uint8_t colorLine[MAX_SPRITES][VIC_MAX_X+2*SPRITE_X_SIZE]; // genug speicher für alle Fälle bereitstellen
+    uint8_t collisionBuffer[400];  
+    uint8_t mask;
+    uint8_t color;
+
+
+    if (rasterPosY>299)  return; // der Screen hat momentan nur 300 Zeilen
+
+    if (vicRegisters.sprite_enable==0) return; // No Sprites Enable -> nothing to do 
+
+#if 0
+    for(int sprite=(MAX_SPRITES-1);sprite>=0;sprite--) {
+        if (vicRegisters.sprite_enable & mask ) {
+            for(int x=0;x<VIC_MAX_X;x++) {
+                colorLine[sprite][x] = 0x10;
+            }
+        }
+    }
+#endif
+
+    for (int i=0;i<50;i++) collisionBuffer[i]=0;  
+
+    bankOfset = bank * 0x4000;
+    screenAddr = bankOfset + ((vicRegisters.memory_control>>4) & 0xf) * SCREENSIZE_BYTE;
+
+    for (int spriteNr=0;spriteNr<8;spriteNr++) {      
+        mask = 1 << spriteNr;  
+        if (vicRegisters.sprite_enable & mask ) {
+            // printf("update 1 sprint %d \n",i);
+            spriteY = vicRegisters.spritePos[spriteNr][INDEX_Y];
+            distance = rasterPosY - spriteY;
+            if (distance < 0 ) continue;            
+            if (vicRegisters.sprite_double_height & mask) {
+                sizeY = 2 * SPRITE_Y_SIZE;
+                doubleHight = 1;
+             } else {
+                sizeY = SPRITE_Y_SIZE;
+                doubleHight = 0;
+             }
+            if (distance>=sizeY) continue;
+
+            if (vicRegisters.sprite_double_width & mask) {
+                sizeX = 2 * SPRITE_X_SIZE;
+                doubleWidth = 1;
+            } else {
+                sizeX = SPRITE_X_SIZE;
+                doubleWidth = 0;
+            }
+
+            spriteX = vicRegisters.spritePos[spriteNr][INDEX_X];
+            if (vicRegisters.sprite_x_msb & mask)  {
+                spriteX += 256;
+            }
+            if (vicRegisters.sprite_multicolor & mask) {
+                colorSprite=1;
+            }  else {
+                colorSprite=0;
+            }
+
+            spritePtr = memory[screenAddr+SCREENSIZE_BYTE-MAX_SPRITES+spriteNr] * 64;
+
+            if (vicRegisters.sprite_double_height & mask) {
+                spritePtr =  spritePtr + (distance>>1) * SPRITE_X_BYTE;
+            } else {
+                spritePtr =  spritePtr + distance * SPRITE_X_BYTE;
+            }
+            
+            // Farbinformationen holen
+            for(int sByte=0;sByte<SPRITE_X_BYTE;sByte++) {
+                uint8_t val;
+                val = memory[bankOfset + spritePtr++];
+                if (colorSprite) {
+                    uint8_t bitMask =  0xc0;
+                    for (int bitCnt=0;bitCnt<8;bitCnt +=2) {
+                        if (val & bitMask)  {       
+                            switch(val & bitMask) {
+                                case 0xc0:
+                                case 0x30:
+                                case 0x0c:
+                                case 0x03:
+                                            color = vicRegisters.sprite_multicolor1;
+                                    break;
+                                case 0x80:
+                                case 0x20:
+                                case 0x08:
+                                case 0x02:
+                                            color = vicRegisters.sprite_multicolor0;
+                                break;
+                                case 0x40:
+                                case 0x10:
+                                case 0x04:
+                                case 0x01:
+                                            color = vicRegisters.sprite_color[spriteNr];
+                                break;
+                            }  
+                            if (collisionBuffer[spriteX]) {
+                                vicRegisters.sprite_collision |= (0x01 <<spriteNr);
+                                collisionBuffer[spriteX]=(spriteNr+1);
+                            }
+                            windowsScreen[rasterPosY][spriteX++] = color;
+                            windowsScreen[rasterPosY][spriteX++] = color;
+                            if (doubleWidth) {
+                                windowsScreen[rasterPosY][spriteX++] = color;
+                                windowsScreen[rasterPosY][spriteX++] = color;
+                            }
+                        } else {
+                            spriteX++;
+                            spriteX++;
+                            if (doubleWidth) {
+                                spriteX++;
+                                spriteX++;
+                            }    
+                        }
+                        bitMask = bitMask >> 2;
+                    }
+                } else {
+                    uint8_t bitMask =  0x80;
+                    for (int bitCnt=0;bitCnt<8;bitCnt++) {
+                        if (val & bitMask)  {       
+                            color = vicRegisters.sprite_color[spriteNr];
+                            if (collisionBuffer[spriteX]) {
+                                vicRegisters.sprite_collision |= (0x01 <<spriteNr);
+                                collisionBuffer[spriteX]=(spriteNr+1);
+                            }
+                            windowsScreen[rasterPosY][spriteX++] = color;
+                            if (doubleWidth) {
+                                if (collisionBuffer[spriteX]) {
+                                    vicRegisters.sprite_collision |= (0x01 <<spriteNr);
+                                    collisionBuffer[spriteX]=(spriteNr+1);
+                                }
+                                windowsScreen[rasterPosY][spriteX++] = color;
+                            }
+                        } else {
+                            spriteX++;
+                            if (doubleWidth) {
+                                spriteX++;
+                            }    
+                        }
+                        bitMask = bitMask >> 1;
+                    }
+                }
+            }
+        }
+    }
+
+#if 0
+    mask = 0x80;
+    for(int sprite=(MAX_SPRITES-1);sprite>=0;sprite--) {
+        if (vicRegisters.sprite_enable & mask ) {
+            for(int x=0;x<VIC_MAX_X;x++) {
+                if (colorLine[sprite][x]<0x10) {
+                    windowsScreen[rasterPosY][x] = colorLine[sprite][x];
+                }
+            }
+        }
+        mask = mask >> 1;  
+    }
+#endif
+
+}
+#if 0
 void drawSprite(void) {
     uint8_t mask;
     uint8_t bitMask;
@@ -227,11 +402,12 @@ void drawSprite(void) {
 #define OFFSE_X  8
     uint8_t bank = cia_getVidoeBank();
     uint16_t bankOfset;
+    uint16_t screenAddr;
 
 
     if (vicRegisters.sprite_enable) {
         bankOfset = bank * 0x4000;
-        screenAddr = bankOfset + ((vicRegisters.memory_control>>4) & 0xf) * 0x0400;
+        screenAddr = bankOfset + ((vicRegisters.memory_control>>4) & 0xf) * SCREENSIZE_BYTE;
       //  printf("%d %04X  %04X  %04X  %d\n",bank,bankOfset,screenAddr, bankOfset +  memory[screenAddr+0x400-8] * 64,memory[screenAddr+0x400-8]);
 
 
@@ -270,7 +446,6 @@ void drawSprite(void) {
                                         case 0x04:
                                         case 0x01:
                                                     color = vicRegisters.sprite_multicolor1;
-                                        break;
                                         break;
                                     }                             
                                     if ((vicRegisters.sprite_double_width & mask) || (vicRegisters.sprite_double_height & mask)) {
@@ -322,78 +497,29 @@ void drawSprite(void) {
         }
     }
 }
-
-
-void keyMapDown(int ascii,int rawKey) {
-
-    if ((rawKey>=120) && (rawKey<124)) {
-        switch(rawKey) {
-            case 123:
-                load_Flaschbier();
-                break;
-            case 122:
-                load_neptun();
-                break;                
-        }
-        return;
-    }
-
-    if (portKeyMap.lifeTime<=0)  {
-        if  (ascii) {
-            for (int i=0;i<sizeof(keyMappings)/sizeof(keyMappings[0]);i++) {
-                if (ascii==keyMappings[i].keycode) {
-                    portKeyMap.lifeTime = 30000; // 30ms
-                    portKeyMap.portA1 = keyMappings[i].portA1;
-                    portKeyMap.portB1 = keyMappings[i].portB1;
-                    portKeyMap.portA2 = keyMappings[i].portA2;
-                    portKeyMap.portB2 = keyMappings[i].portB2;
-                    // printf("%02x   %02x  %02x  %02x\n",portKeyMap.portA1,portKeyMap.portB1,portKeyMap.portA2,portKeyMap.portB2);
-                    return;
-                }
-            }
-        } else {
-            if  (rawKey) {
-                for (int i=0;i<sizeof(keyMappingsWParam)/sizeof(keyMappingsWParam[0]);i++) {
-                    if (rawKey==keyMappingsWParam[i].keycode) {
-                        portKeyMap.lifeTime = 30000; // 30ms
-                        portKeyMap.portA1 = keyMappingsWParam[i].portA1;
-                        portKeyMap.portB1 = keyMappingsWParam[i].portB1; 
-                        portKeyMap.portA2 = keyMappingsWParam[i].portA2;
-                        portKeyMap.portB2 = keyMappingsWParam[i].portB2;
-                        //   printf("%02x   %02x  %02x  %02x\n",portKeyMap.portA1,portKeyMap.portB1,portKeyMap.portA2,portKeyMap.portB2);
-                        return;
-                    }
-                }
-                for (int i=0;i<sizeof(stickMappingsWParam)/sizeof(stickMappingsWParam[0]);i++) {
-                    if (rawKey==stickMappingsWParam[i].keycode) {
-                        // portKeyMap.lifeTime = 100000; // 100ms
-                        portKeyMap.stick1 |= stickMappingsWParam[i].portA1;
-                        // printf("%d   %02x\n",wParam,portKeyMap.stick1);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-}
-
-void keyMapUp(int rawKey) {
-    for (int i=0;i<sizeof(stickMappingsWParam)/sizeof(stickMappingsWParam[0]);i++) {
-        if (rawKey==stickMappingsWParam[i].keycode) {
-            portKeyMap.stick1 &= ~stickMappingsWParam[i].portA1;
-            return;
-        }
-    }
-}
-
+#endif
 
 void update_vic(uint32_t clkCount) {
     static uint32_t oldRaster;
     uint32_t raster;
+
+
     // static int rast=0;
     raster = (clkCount / 64) % 312;
 
     if  (oldRaster != raster) {
+
+        if (raster==0) drawGrid();
+
+        startTsc = rdtsc();
+
+        updateSpriteLine(raster);
+
+        endTsc = rdtsc();
+        uint64_t cntTsc = endTsc - startTsc;
+        gesTsc =  gesTsc + cntTsc;
+
+
         vicRegisters.raster_line = raster & 0xff;
         if (raster &0x100) {
             vicRegisters.control1 |= 0x80;
@@ -405,19 +531,21 @@ void update_vic(uint32_t clkCount) {
                 vicRegisters.irq_status |= 0x81;
                 doIRQ=1;
             }
+           
+            // drawSprite();
+            drawBoarder();
         }
 
-        if (raster == 0) {             
+        if (raster == 300) {             
             vicUpdateCnt++;
-            drawGrid();
-            drawSprite();
-            drawBoarder();
             windowsUpdateScreen(&windowsScreen[0][0]);
             if ((vicUpdateCnt%2)==0) {
-                Sleep(20);
+                Sleep(10);
             } else {
                 Sleep(10);
             }
+    
+
           // printf("rast %d  %x\n",cnt,windowHandle);
         }
     }

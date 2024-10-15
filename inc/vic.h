@@ -26,10 +26,51 @@
 
 #define MULTICOLORTEXT 0x10
 
+#define INDEX_X 0
+#define INDEX_Y 1
+
+#define SPRITE_Y_SIZE 21
+#define SPRITE_X_SIZE 24
+#define SPRITE_X_BYTE (SPRITE_X_SIZE/8)
+
+#define SCREENSIZE_BYTE 0x400
+#define MAX_SPRITES 8
+
+
+// RSEL	Höhe des Anzeigefensters 	Erste Zeile   	Letzte Zeile  
+// 0	24 Textzeilen/192 Pixel     	55 ($37)	    246 ($f6)
+// 1	25 Textzeilen/200 Pixel 	    51 ($33)	    250 ($fa)
+// 
+//CSEL	Breite des Anzeigefensters	Erste X-Koo.	Letzte X-Koo.
+// 0	38 Zeichen/304 Pixel	        31 ($1f	        334 ($14e)
+// 1	40 Zeichen/320 Pixel	        24 ($18)	    343 ($157)
+
+// Typ	    	Videonorm	Anzahl Zeilen	Sichtbare Zeilen	Zyklen/Zeile	Sichtbare Pixel/Zeile
+// 6567R56A	    NTSC-M	        262	            234	                64	            411
+// 6567R8	    NTSC-M	        263	            235	                65	            418
+// 6569	        PAL-B	        312	            284             	63	            403
+
+// Typ	            Erste   Letzte          Erste X-Koo.    Erste sichtbare     Letzte sichtbare
+//          V-Blank-Zeile	V-Blank-Zeile	einer Zeile     X-Koordinate        X-Koordinate
+//6567R56A	        13	        40	            412 ($19c)	    488 ($1e8)      	388 ($184)
+//6567R8	        13	        40	            412 ($19c)  	489 ($1e9)	        396 ($18c)
+//6569	           300	        15	            404 ($194)  	480 ($1e0)	        380 ($17c)
+
+// Der Referenzpunkt für den Beginn einer Rasterzeile ist das Auftreten des Raster-IRQ,
+// der aber nicht mit der X-Koordinate 0 zusammenfällt, sondern mit der unter „Erste X-Koo. 
+// einer Zeile” angegebenen. Die X-Koordinaten laufen innerhalb der Zeile bis $1ff (beim 6569 nur bis $1f7),
+// dann erst kommt X-Koordinate 0. 
+
+
+// #define VIC_LINES_CNT   312
+#define VIC_VIB_LINE    300 
+#define VIC_MAX_X       343
+#define VIC_MAX_Y       312
+
 typedef struct {
     // $D000: Sprite 0 X-Position (siehe auch $D010)
     // $D001: Sprite 0 Y-Position
-    uint8_t spritePos[16];
+    uint8_t spritePos[MAX_SPRITES][2];
     
     // $D010: Höchstes Bit der X-Position für alle Sprites (Bit-Nr. = Sprite-Nr.)
     // Bit 0: Sprite 0 X-MSB

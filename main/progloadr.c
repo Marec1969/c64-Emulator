@@ -30,7 +30,7 @@ void load_Flaschbier() {
 }
 
 
-void load_neptun2() {
+void load_neptun() {
     int i;    
 
     uint16_t startAddr;
@@ -49,7 +49,7 @@ void load_neptun2() {
  
 }
 
-void load_neptun() {
+void load_Ghost() {
     int i;    
 
     uint16_t startAddr;
