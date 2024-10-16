@@ -1,11 +1,11 @@
-// Header-Datei: cpu_functions.h
+// Header-Datei: cpuFunctions.h
 
 #ifndef CPU_FUNCTIONS_H
 #define CPU_FUNCTIONS_H
 
 #include <stdint.h>
-extern uint8_t read_memory(uint16_t addr);
-extern void write_memory(uint16_t addr, uint8_t value);
+extern uint8_t readMemory(uint16_t addr);
+extern void writeMemory(uint16_t addr, uint8_t value);
 extern uint16_t addrImmediate(void);
 extern uint16_t addrZeropage(void);
 extern uint16_t addrZeropageX(void);
@@ -17,16 +17,16 @@ extern uint16_t addrIndirect(void);
 extern uint16_t addrIndirectX(void);
 extern uint16_t addrIndirect_Y(void);
 
-extern void set_flag(uint8_t flag, int value);
-extern int get_flag(uint8_t flag);
-extern void set_flagsQQQ(uint8_t result);
-extern void init_stack(void);
-extern void push_stack8(uint8_t value);
-extern uint8_t pop_stack8(void);
-extern void push_stack16(uint16_t value);
-extern uint16_t pop_stack16(void);
+extern void setFlag(uint8_t flag, int value);
+extern int getFlag(uint8_t flag);
+extern void setFlagsqqq(uint8_t result);
+extern void initStack(void);
+extern void pushStack8(uint8_t value);
+extern uint8_t popStack8(void);
+extern void pushStack16(uint16_t value);
+extern uint16_t popStack16(void);
 
-extern int trigger_irq();
+extern int triggerIrq();
 
 // Prototypen für die Operationen auf dem Akkumulator
 extern void ROR_A(void);            // Rotate Right auf den Akkumulator

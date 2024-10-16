@@ -4,22 +4,22 @@
 
 #include <stdint.h> 
 
-#define SCHWARZ 0
-#define WEISS 1
-#define ROT 2
-#define TUEKIS 3
-#define VIOLETT 4
-#define GRUEN 5
-#define BLAU 6
-#define GELB 7
+#define BLACK 0
+#define WHITE 1
+#define RED 2
+#define TURQUOISE 3
+#define PURPLE 4
+#define GREEN 5
+#define BLUE 6
+#define YELLOW 7
 #define ORANGE 8
-#define BRAUN 9
-#define HELLROT 10
-#define DUNKELGRAU 11
-#define MITTELGRAU 12
-#define HELLGRUEN 13
-#define HELLBLAU 14
-#define HELLGRAU 15
+#define BROWN 9
+#define LIGHT_RED 10
+#define DARK_GRAY 11
+#define MEDIUM_GRAY 12
+#define LIGHT_GREEN 13
+#define LIGHT_BLUE 14
+#define LIGHT_GRAY 15
 
 #define COLOR_ADDR     0xD800
 #define COLOR_ADDR_END 0xDBE7
@@ -95,7 +95,7 @@ typedef struct {
     // Bit 5: Sprite 5 X-MSB
     // Bit 6: Sprite 6 X-MSB
     // Bit 7: Sprite 7 X-MSB
-    uint8_t sprite_x_msb;
+    uint8_t spriteX_msb;
     
     // $D011: Kontrollregister 1
     // Bit 7: 9. Bit der Rasterzeile ($D012)
@@ -107,13 +107,13 @@ typedef struct {
     uint8_t control1;
     
     // $D012: Rasterzeile (IRQ wird hier ausgelöst)
-    uint8_t raster_line;
+    uint8_t rasterLine;
     
     // $D013: Lichtgriffel X-Position (Lesen)
-    uint8_t lightpen_x;
+    uint8_t lightpenX;
     
     // $D014: Lichtgriffel Y-Position (Lesen)
-    uint8_t lightpen_y;
+    uint8_t lightpenY;
     
     // $D015: Sprite Aktivierung (Bit-Nr. = Sprite-Nr.)
     // Bit 0: Sprite 0 aktiv
@@ -124,7 +124,7 @@ typedef struct {
     // Bit 5: Sprite 5 aktiv
     // Bit 6: Sprite 6 aktiv
     // Bit 7: Sprite 7 aktiv
-    uint8_t sprite_enable;
+    uint8_t spriteEnable;
     
     // $D016: Kontrollregister 2
     // Bit 7-5: unbenutzt
@@ -142,14 +142,14 @@ typedef struct {
     // Bit 5: Sprite 5 doppelte Höhe
     // Bit 6: Sprite 6 doppelte Höhe
     // Bit 7: Sprite 7 doppelte Höhe
-    uint8_t sprite_double_height;
+    uint8_t spriteDouble_height;
     
     // $D018: Speicherkontrollregister
     // Bit 7-4: Adresse des Bildschirmspeichers für den Textmodus (1024 * (Bits 7-4))
     // Bit 3-1: Adresse des Zeichensatzes für den Textmodus (2048 * (Bits 3-1))
     // Bit 3: Im Bitmap-Modus wählt dies den Speicherbereich für Grafik (0 = $0000-$1FFF, 1 = $2000-$3FFF)
     // Bit 0: wird überlesen
-    uint8_t memory_control;
+    uint8_t memoryControl;
     
     // $D019: Interrupt-Status (lesen: 1 = IRQ aufgetreten, schreiben: IRQ bestätigen)
     // Bit 7: IRQ aufgetreten (welcher steht in Bits 3-0)
@@ -157,57 +157,57 @@ typedef struct {
     // Bit 2: IRQ durch Sprite-Sprite-Kollision
     // Bit 1: IRQ durch Sprite-Hintergrund-Kollision
     // Bit 0: IRQ von Rasterzeile
-    uint8_t irq_status;
+    uint8_t irqStatus;
     
     // $D01A: Interrupt-Maske (IRQ freigeben)
     // Bit 3: Lichtgriffel IRQ erlauben
     // Bit 2: Sprite-Sprite-Kollision IRQ erlauben
     // Bit 1: Sprite-Hintergrund-Kollision IRQ erlauben
     // Bit 0: Rasterzeile IRQ erlauben
-    uint8_t irq_mask;
+    uint8_t irqMask;
     
     // $D01B: Sprite Priorität (0 = vor Hintergrund, 1 = hinter Hintergrund) (Bit-Nr. = Sprite-Nr.)
-    uint8_t sprite_background_priority;
+    uint8_t spriteBackground_priority;
     
     // $D01C: Sprite Multicolor-Modus (0 = Hi-Res, 1 = Multicolor) (Bit-Nr. = Sprite-Nr.)
-    uint8_t sprite_multicolor;
+    uint8_t spriteMulticolor;
     
     // $D01D: Sprite doppelte Breite (0 = normale Breite, 1 = doppelte Breite) (Bit-Nr. = Sprite-Nr.)
-    uint8_t sprite_double_width;
+    uint8_t spriteDouble_width;
     
     // $D01E: Sprite-Sprite-Kollisionen (1 = Kollision) (Bit-Nr. = Sprite-Nr.)
-    uint8_t sprite_collision;
+    uint8_t spriteCollision;
     
     // $D01F: Sprite-Hintergrund-Kollisionen (1 = Kollision) (Bit-Nr. = Sprite-Nr.)
-    uint8_t sprite_background_collision;
+    uint8_t spriteBackground_collision;
     
     // $D020: Rahmenfarbe
-    uint8_t border_color;
+    uint8_t borderColor;
     
     // $D021: Hintergrundfarbe
-    uint8_t background_color;
+    uint8_t backgroundColor;
     
     // $D022: Hintergrundfarbe 1 (für Extended Color-Modus, siehe $D011)
-    uint8_t background_color1;
+    uint8_t backgroundColor1;
     
     // $D023: Hintergrundfarbe 2 (für Extended Color-Modus, siehe $D011)
-    uint8_t background_color2;
+    uint8_t backgroundColor2;
     
     // $D024: Hintergrundfarbe 3 (für Extended Color-Modus, siehe $D011)
-    uint8_t background_color3;
+    uint8_t backgroundColor3;
     
     // $D025: Erste Spritefarbe (Multicolor_0 für Sprite-Multicolormodus, siehe $D01C)
-    uint8_t sprite_multicolor0;
+    uint8_t spriteMulticolor0;
     
     // $D026: Zweite Spritefarbe (Multicolor_1 für Sprite-Multicolormodus, siehe $D01C)
-    uint8_t sprite_multicolor1;
+    uint8_t spriteMulticolor1;
     
     // $D027 - $D02E: Farbe der Sprites 0-7
-    uint8_t sprite_color[8];
+    uint8_t spriteColor[8];
     
     // $D02F: Status der zusätzlichen Tastatur-Pins (nur C128)
     // Bit 2-0: Status der Tastatur-Pins
-    uint8_t keyboard_pins;
+    uint8_t keyboardPins;
     
     // $D030: Betriebsmodus
     // Bit 1: Testmodus
@@ -219,12 +219,12 @@ typedef struct {
 } VIC_II_Registers;
 
 
-// Struktur für Farben mit Farbwert und RGB-Werten
+// Structure for colors with color value and RGB values
 struct Farbe {
-    uint8_t farbwert;    // Farbwert 1..15
-    uint8_t r; // Rot
-    uint8_t g; // Grün
-    uint8_t b; // Blau
+    uint8_t colorValue;    // Color value 1..15
+    uint8_t r; // Red
+    uint8_t g; // Green
+    uint8_t b; // Blue
 };
 
 extern uint8_t colormap[1024];
@@ -232,10 +232,10 @@ extern uint8_t colormap[1024];
 extern VIC_II_Registers vicRegisters;
 
 extern int saveScreen();
-extern uint8_t read_vic(uint16_t addr);
-extern void write_vic_registers_to_file(void);
-extern void write_vic(uint16_t addr,uint8_t value);
-extern void update_vic(uint32_t clkCount);
+extern uint8_t readVic(uint16_t addr);
+extern void writeVic_registers_to_file(void);
+extern void writeVic(uint16_t addr,uint8_t value);
+extern void updateVic(uint32_t clkCount);
 extern void keyMapDown(int ascii,int rawKey);
 extern void keyMapUp(int rawKey);
 #endif 

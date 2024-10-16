@@ -8,43 +8,43 @@
 
 void OPCODE_40(void) {
     // RTI (Return from Interrupt) - Rückkehr aus einem Interrupt
-    cpu.SR = pop_stack8();    // Prozessorstatus (Statusregister) wiederherstellen
-    cpu.PC = pop_stack16();   // Programmzähler (PC) auf den Wert vom Stack setzen
+    cpu.SR = popStack8();    // Prozessorstatus (Statusregister) wiederherstellen
+    cpu.PC = popStack16();   // Programmzähler (PC) auf den Wert vom Stack setzen
 }
 
 void OPCODE_41(void) {
     // EOR (Indirect,X) - Exklusives ODER mit indirekter X-Adressierung
     uint16_t addr = addrIndirectX();                // Berechne die Adresse über Indirekte X-Adressierung
-    EOR_A(read_memory(addr));                       // Führe XOR mit Akku und dem Speicherwert durch
+    EOR_A(readMemory(addr));                       // Führe XOR mit Akku und dem Speicherwert durch
     cpu.PC++;
 }
 
 void OPCODE_45(void) {
     // EOR Zero Page - Exklusives ODER auf der Zero Page
     uint16_t addr = addrZeropage();                  // Hole Adresse aus der Zero Page
-    EOR_A(read_memory(addr));                        // Führe XOR mit Akku und Speicherwert aus
+    EOR_A(readMemory(addr));                        // Führe XOR mit Akku und Speicherwert aus
     cpu.PC++;
 }
 
 void OPCODE_46(void) {
     // LSR Zero Page - Logische Schiebung nach rechts auf der Zero Page
     uint16_t addr = addrZeropage();                  // Hole Adresse aus der Zero Page
-    uint8_t value = read_memory(addr);               // Lese den Wert aus dem Speicher
+    uint8_t value = readMemory(addr);               // Lese den Wert aus dem Speicher
     uint8_t newValue = LSR(value);                   // Führe die LSR-Operation durch
-    write_memory(addr, newValue);                    // Speichere den neuen Wert
+    writeMemory(addr, newValue);                    // Speichere den neuen Wert
     cpu.PC++;
 }
 
 void OPCODE_48(void) {
     // PHA (Push Accumulator) - Akku auf den Stack schieben
-    push_stack8(cpu.A);  // Push den Akkumulator auf den Stack
+    pushStack8(cpu.A);  // Push den Akkumulator auf den Stack
     cpu.PC++;
 }
 
 void OPCODE_49(void) {
     // EOR  Immediate
     uint16_t addr = addrImmediate();                  // Hole Adresse aus der Zero Page
-    EOR_A(read_memory(addr));                        // Führe XOR mit Akku und Speicherwert aus
+    EOR_A(readMemory(addr));                        // Führe XOR mit Akku und Speicherwert aus
     cpu.PC++;
 }
 
@@ -64,15 +64,15 @@ void OPCODE_4C(void) {
 void OPCODE_4D(void) {
     // EOR Absolute - Exklusives ODER mit absoluter Adressierung
     uint16_t addr = addrAbsulut();                   // Hole die absolute Adresse
-    EOR_A(read_memory(addr));                         // Führe XOR mit Akku und Speicherwert aus
+    EOR_A(readMemory(addr));                         // Führe XOR mit Akku und Speicherwert aus
     cpu.PC++;
 }
 
 void OPCODE_4E(void) {
     // LSR Absolute - Logische Schiebung nach rechts auf der absoluten Adresse
     uint16_t addr = addrAbsulut();                   // Hole die absolute Adresse
-    uint8_t value = read_memory(addr);               // Lese den Wert aus dem Speicher
+    uint8_t value = readMemory(addr);               // Lese den Wert aus dem Speicher
     uint8_t newValue = LSR(value);                   // Führe die LSR-Operation durch
-    write_memory(addr, newValue);                    // Speichere den neuen Wert
+    writeMemory(addr, newValue);                    // Speichere den neuen Wert
     cpu.PC++;
 }

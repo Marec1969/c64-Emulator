@@ -4,65 +4,65 @@
 #include "cpu6510.h"
 
 // Funktion zum Überprüfen der Werte im Speicher
-static void check_memory(uint16_t address, uint8_t expected_value) {
-    uint8_t actual_value = read_memory(address);
-    if (actual_value == expected_value) {
-        printf("Test Passed: Address 0x%04X = 0x%02X\n", address, actual_value);
+static void checkMemory(uint16_t address, uint8_t expectedValue) {
+    uint8_t actualValue = readMemory(address);
+    if (actualValue == expectedValue) {
+        printf("Test Passed: Address 0x%04X = 0x%02X\n", address, actualValue);
     } else {
-        printf("Test Failed: Address 0x%04X = 0x%02X (Expected: 0x%02X)\n", address, actual_value, expected_value);
+        printf("Test Failed: Address 0x%04X = 0x%02X (Expected: 0x%02X)\n", address, actualValue, expectedValue);
     }
 }
 
 // Test für INC Zero Page
-void test_INC_Zero_Page() {
-    write_memory(0x00, 0xE6); // INC $00
-    write_memory(0x01, 0x10); // Zieladresse 0x0010
-    write_memory(0x0010, 0x01); // Wert an Adresse 0x0010
+void testInc_zero_page() {
+    writeMemory(0x00, 0xE6); // INC $00
+    writeMemory(0x01, 0x10); // Zieladresse 0x0010
+    writeMemory(0x0010, 0x01); // Wert an Adresse 0x0010
     cpu.PC = 0x00;
 
     OPCODE_E6(); // INC Zero Page
-    check_memory(0x0010, 0x02); // Überprüfen
+    checkMemory(0x0010, 0x02); // Überprüfen
 }
 
 // Test für INC Zero Page,X
-void test_INC_Zero_Page_X() {
+void testInc_zero_page_x() {
     cpu.X = 0x01; // Setze X auf 1
-    write_memory(0x00, 0xF6); // INC $00,X
-    write_memory(0x01, 0x10); // Zieladresse 0x0010
-    write_memory(0x0011, 0x05); // Wert an Adresse 0x0011
+    writeMemory(0x00, 0xF6); // INC $00,X
+    writeMemory(0x01, 0x10); // Zieladresse 0x0010
+    writeMemory(0x0011, 0x05); // Wert an Adresse 0x0011
     cpu.PC = 0x00;
 
     OPCODE_F6(); // INC Zero Page,X
-    check_memory(0x0011, 0x06); // Überprüfen
+    checkMemory(0x0011, 0x06); // Überprüfen
 }
 
 // Test für INC Absolute
-void test_INC_Absolute() {
-    write_memory(0x00, 0xEE); // INC $0000
-    write_memory(0x01, 0x00); // Niedriger Teil der Adresse
-    write_memory(0x02, 0x00); // Hoher Teil der Adresse
-    write_memory(0x0000, 0x03); // Wert an Adresse 0x0000
+void testInc_absolute() {
+    writeMemory(0x00, 0xEE); // INC $0000
+    writeMemory(0x01, 0x00); // Niedriger Teil der Adresse
+    writeMemory(0x02, 0x00); // Hoher Teil der Adresse
+    writeMemory(0x0000, 0x03); // Wert an Adresse 0x0000
     cpu.PC = 0x00;
 
     OPCODE_EE(); // INC Absolute
-    check_memory(0x0000, 0x04); // Überprüfen
+    checkMemory(0x0000, 0x04); // Überprüfen
 }
 
 // Test für INC Absolute,X
-void test_INC_Absolute_X() {
+void testInc_absolute_x() {
     cpu.X = 0x04; // Setze X auf 1
-    write_memory(0x00, 0xFE); // INC $0000,X
-    write_memory(0x01, 0x00); // Niedriger Teil der Adresse
-    write_memory(0x02, 0x00); // Hoher Teil der Adresse
-    write_memory(0x0004, 0x02); // Wert an Adresse 0x0001
+    writeMemory(0x00, 0xFE); // INC $0000,X
+    writeMemory(0x01, 0x00); // Niedriger Teil der Adresse
+    writeMemory(0x02, 0x00); // Hoher Teil der Adresse
+    writeMemory(0x0004, 0x02); // Wert an Adresse 0x0001
     cpu.PC = 0x00;
 
     OPCODE_FE(); // INC Absolute,X
-    check_memory(0x0004, 0x03); // Überprüfen
+    checkMemory(0x0004, 0x03); // Überprüfen
 }
 
 // Test für INX
-void test_INX() {
+void testInx() {
     cpu.X = 0x7F; // Setze X auf 0x7F
     cpu.PC = 0x00;
 
@@ -75,7 +75,7 @@ void test_INX() {
 }
 
 // Test für INY
-void test_INY() {
+void testIny() {
     cpu.Y = 0x7F; // Setze Y auf 0x7F
     cpu.PC = 0x00;
 
@@ -87,17 +87,17 @@ void test_INY() {
     }
 }
 
-void inc_test() {
+void incTest() {
     memset(&cpu, 0, sizeof(cpu)); // CPU zurücksetzen
 
     printf("Running Increment Operations Tests...\n");
 
-    test_INC_Zero_Page();
-    test_INC_Zero_Page_X();
-    test_INC_Absolute();
-    test_INC_Absolute_X();
-    test_INX();
-    test_INY();
+    testInc_zero_page();
+    testInc_zero_page_x();
+    testInc_absolute();
+    testInc_absolute_x();
+    testInx();
+    testIny();
 
     printf("All Increment Operations Tests Completed.\n");
 

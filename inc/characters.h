@@ -347,6 +347,6 @@ const unsigned char characters[] = {
     0xF0, 0xF0, 0xF0, 0xF0, 
 };
 
-const unsigned int characters_len = 4096;
+const unsigned int charactersLen = 4096;
 
 #endif // CHARACTERS_H

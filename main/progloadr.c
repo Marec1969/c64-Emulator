@@ -8,7 +8,7 @@
 #include <cpu6510.h>
 
 
-void load_Flaschbier() {
+void loadFlaschbier() {
     int i;    
     int dst=0x801;
 
@@ -30,7 +30,7 @@ void load_Flaschbier() {
 }
 
 
-void load_neptun() {
+void loadNeptun() {
     int i;    
 
     uint16_t startAddr;
@@ -49,7 +49,7 @@ void load_neptun() {
  
 }
 
-void load_Ghost() {
+void loadGhost() {
     int i;    
 
     uint16_t startAddr;

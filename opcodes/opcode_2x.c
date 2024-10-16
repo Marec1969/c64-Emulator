@@ -10,52 +10,52 @@
 void OPCODE_20(void) {
     // JSR (Jump to Subroutine)
     uint16_t addr = addrAbsulut();               // Verwende addrAbsulut für die Zieladresse
-    push_stack16(cpu.PC);                    // Rücksprungadresse (nach JSR) auf den Stack
+    pushStack16(cpu.PC);                    // Rücksprungadresse (nach JSR) auf den Stack
     cpu.PC = addr;                               // Springe zur Zieladresse
 }
 
 void OPCODE_21(void) {
     // AND (Indirect, X) - Logisches UND mit indirekter X-Adressierung
     uint16_t addr = addrIndirectX();             // Verwende addrIndirectX für die Adresse
-    AND_A(read_memory(addr));                    // Verwende die AND_A-Funktion
+    AND_A(readMemory(addr));                    // Verwende die AND_A-Funktion
     cpu.PC++;    
 }
 
 void OPCODE_24(void) {
     // BIT (Zero Page) - Testet bestimmte Bits in der Zero Page
     uint16_t addr = addrZeropage();              // Verwende addrZeropage für die Zero Page Adresse
-    uint8_t value = read_memory(addr);           // Lese den Wert aus der Zero Page
-    set_flag(FLAG_ZERO, (cpu.A & value) == 0);
-    set_flag(FLAG_OVERFLOW, value & 0x40);
-    set_flag(FLAG_NEGATIVE, value & 0x80);
+    uint8_t value = readMemory(addr);           // Lese den Wert aus der Zero Page
+    setFlag(FLAG_ZERO, (cpu.A & value) == 0);
+    setFlag(FLAG_OVERFLOW, value & 0x40);
+    setFlag(FLAG_NEGATIVE, value & 0x80);
     cpu.PC++;
 }
 
 void OPCODE_25(void) {
     // AND (Zero Page) - Logisches UND auf die Zero Page
     uint16_t addr = addrZeropage();              // Verwende addrZeropage
-    AND_A(read_memory(addr));                    // Verwende die AND_A-Funktion
+    AND_A(readMemory(addr));                    // Verwende die AND_A-Funktion
     cpu.PC++;
 }
 
 void OPCODE_26(void) {
     // ROL (Zero Page) - Linksrotation der Zero Page
     uint16_t addr = addrZeropage();              // Verwende addrZeropage
-    uint8_t value = read_memory(addr);
+    uint8_t value = readMemory(addr);
     value = ROL(value);                          // Führe ROL-Operation durch
-    write_memory(addr, value);                   // Schreibe den neuen Wert zurück
+    writeMemory(addr, value);                   // Schreibe den neuen Wert zurück
     cpu.PC++;
 }
 
 void OPCODE_28(void) {
     // PLP (Pull Processor Status) - Holen des Prozessorstatus vom Stack
-    cpu.SR = pop_stack8();       // Statusregister vom Stack holen
+    cpu.SR = popStack8();       // Statusregister vom Stack holen
     cpu.PC++;
 }
 
 void OPCODE_29(void) {
     // AND (Immediate) - Logisches UND mit unmittelbarem Wert
-    uint8_t value = read_memory(addrImmediate()); // Verwende addrImmediate für die Adresse
+    uint8_t value = readMemory(addrImmediate()); // Verwende addrImmediate für die Adresse
     AND_A(value);                                 // Verwende die AND_A-Funktion
     cpu.PC++;
 }
@@ -69,25 +69,25 @@ void OPCODE_2A(void) {
 void OPCODE_2C(void) {
     // BIT (Absolute) - Testet Bits an einer absoluten Adresse
     uint16_t addr = addrAbsulut();               // Verwende addrAbsulut
-    uint8_t value = read_memory(addr);
-    set_flag(FLAG_ZERO, (cpu.A & value) == 0);
-    set_flag(FLAG_NEGATIVE, value & 0x80);
-    set_flag(FLAG_OVERFLOW, value & 0x40);
+    uint8_t value = readMemory(addr);
+    setFlag(FLAG_ZERO, (cpu.A & value) == 0);
+    setFlag(FLAG_NEGATIVE, value & 0x80);
+    setFlag(FLAG_OVERFLOW, value & 0x40);
     cpu.PC++;
 }
 
 void OPCODE_2D(void) {
     // AND (Absolute) - Logisches UND mit absoluter Adresse
     uint16_t addr = addrAbsulut();               // Verwende addrAbsulut
-    AND_A(read_memory(addr));                     // Verwende die AND_A-Funktion
+    AND_A(readMemory(addr));                     // Verwende die AND_A-Funktion
     cpu.PC++;
 }
 
 void OPCODE_2E(void) {
     // ROL (Absolute) - Linksrotation an einer absoluten Adresse
     uint16_t addr = addrAbsulut();               // Verwende addrAbsulut
-    uint8_t value = read_memory(addr);
+    uint8_t value = readMemory(addr);
     value = ROL(value);                          // Führe ROL-Operation durch
-    write_memory(addr, value);                   // Schreibe den neuen Wert zurück
+    writeMemory(addr, value);                   // Schreibe den neuen Wert zurück
     cpu.PC++;
 }

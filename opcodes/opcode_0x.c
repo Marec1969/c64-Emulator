@@ -17,7 +17,7 @@ void OPCODE_00(void) {
 void OPCODE_01(void) {
     // ORA (Indirect,cpu.X)
     uint16_t addr = addrIndirectX();
-    ORA_A(read_memory(addr));
+    ORA_A(readMemory(addr));
     cpu.PC++;
 }
 
@@ -25,29 +25,29 @@ void OPCODE_01(void) {
 void OPCODE_05(void) {
     // ORA Zero Page
     uint16_t addr = addrZeropage();
-    ORA_A(read_memory(addr));
+    ORA_A(readMemory(addr));
     cpu.PC++;
 }
 
 void OPCODE_06(void) {
     // ASL Zero Page
     uint16_t addr = addrZeropage();
-    uint8_t value = read_memory(addr);
+    uint8_t value = readMemory(addr);
     value = ASL(value);
-    write_memory(addr,value);
+    writeMemory(addr,value);
     cpu.PC++;
 }
 
 void OPCODE_08(void) {
     // PHP (Push Processor Status)
-    push_stack8(cpu.SR);
+    pushStack8(cpu.SR);
     cpu.PC++;
 }
 
 void OPCODE_09(void) {
     // ORA Immediate
     uint16_t addr = addrImmediate();
-    ORA_A(read_memory(addr));
+    ORA_A(readMemory(addr));
     cpu.PC++;
 }
 
@@ -61,17 +61,17 @@ void OPCODE_0A(void) {
 void OPCODE_0D(void) {
     // ORA Absolute
     uint16_t addr = addrAbsulut();
-    ORA_A(read_memory(addr));
+    ORA_A(readMemory(addr));
     cpu.PC++;
 }
 
 void OPCODE_0E(void) {
     // ASL Absolute
     uint16_t addr = addrAbsulut();
-    uint8_t value = read_memory(addr);
+    uint8_t value = readMemory(addr);
 
     value = ASL(value);
-    write_memory(addr,value);
+    writeMemory(addr,value);
     cpu.PC++;
 }
 

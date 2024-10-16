@@ -4,65 +4,65 @@
 #include "cpu6510.h"
 
 // Funktion zum Überprüfen der Werte im Speicher
-static void check_memory(uint16_t address, uint8_t expected_value) {
-    uint8_t actual_value = read_memory(address);
-    if (actual_value == expected_value) {
-        printf("Test Passed: Address 0x%04X = 0x%02X\n", address, actual_value);
+static void checkMemory(uint16_t address, uint8_t expectedValue) {
+    uint8_t actualValue = readMemory(address);
+    if (actualValue == expectedValue) {
+        printf("Test Passed: Address 0x%04X = 0x%02X\n", address, actualValue);
     } else {
-        printf("Test Failed: Address 0x%04X = 0x%02X (Expected: 0x%02X)\n", address, actual_value, expected_value);
+        printf("Test Failed: Address 0x%04X = 0x%02X (Expected: 0x%02X)\n", address, actualValue, expectedValue);
     }
 }
 
 // Test für DEC Zero Page
-void test_DEC_Zero_Page() {
-    write_memory(0x00, 0xC6); // DEC $00
-    write_memory(0x01, 0x10); // Zieladresse 0x0010
-    write_memory(0x0010, 0x05); // Initialwert
+void testDec_zero_page() {
+    writeMemory(0x00, 0xC6); // DEC $00
+    writeMemory(0x01, 0x10); // Zieladresse 0x0010
+    writeMemory(0x0010, 0x05); // Initialwert
     cpu.PC = 0x00;
 
     OPCODE_C6(); // DEC Zero Page
-    check_memory(0x0010, 0x04); // Überprüfen
+    checkMemory(0x0010, 0x04); // Überprüfen
 }
 
 // Test für DEC Zero Page,X
-void test_DEC_Zero_Page_X() {
+void testDec_zero_page_x() {
     cpu.X = 0x01; // Setze X auf 1
-    write_memory(0x00, 0xD6); // DEC $00,X
-    write_memory(0x01, 0x10); // Zieladresse 0x0010
-    write_memory(0x0011, 0x03); // Initialwert
+    writeMemory(0x00, 0xD6); // DEC $00,X
+    writeMemory(0x01, 0x10); // Zieladresse 0x0010
+    writeMemory(0x0011, 0x03); // Initialwert
     cpu.PC = 0x00;
 
     OPCODE_D6(); // DEC Zero Page,X
-    check_memory(0x0011, 0x02); // Überprüfen
+    checkMemory(0x0011, 0x02); // Überprüfen
 }
 
 // Test für DEC Absolute
-void test_DEC_Absolute() {
-    write_memory(0x00, 0xCE); // DEC $0000
-    write_memory(0x01, 0x00); // Niedriger Teil der Adresse
-    write_memory(0x02, 0x00); // Hoher Teil der Adresse
-    write_memory(0x0000, 0x02); // Initialwert
+void testDec_absolute() {
+    writeMemory(0x00, 0xCE); // DEC $0000
+    writeMemory(0x01, 0x00); // Niedriger Teil der Adresse
+    writeMemory(0x02, 0x00); // Hoher Teil der Adresse
+    writeMemory(0x0000, 0x02); // Initialwert
     cpu.PC = 0x00;
 
     OPCODE_CE(); // DEC Absolute
-    check_memory(0x0000, 0x01); // Überprüfen
+    checkMemory(0x0000, 0x01); // Überprüfen
 }
 
 // Test für DEC Absolute,X
-void test_DEC_Absolute_X() {
+void testDec_absolute_x() {
     cpu.X = 0x04; // Setze X auf 1
-    write_memory(0x00, 0xDE); // DEC $0000,X
-    write_memory(0x01, 0x00); // Niedriger Teil der Adresse
-    write_memory(0x02, 0x00); // Hoher Teil der Adresse
-    write_memory(0x0004, 0x01); // Initialwert
+    writeMemory(0x00, 0xDE); // DEC $0000,X
+    writeMemory(0x01, 0x00); // Niedriger Teil der Adresse
+    writeMemory(0x02, 0x00); // Hoher Teil der Adresse
+    writeMemory(0x0004, 0x01); // Initialwert
     cpu.PC = 0x00;
 
     OPCODE_DE(); // DEC Absolute,X
-    check_memory(0x0004, 0x00); // Überprüfen
+    checkMemory(0x0004, 0x00); // Überprüfen
 }
 
 // Test für DEX
-void test_DEX() {
+void testDex() {
     cpu.X = 0x01; // Setze X auf 0x01
     cpu.PC = 0x00;
 
@@ -75,7 +75,7 @@ void test_DEX() {
 }
 
 // Test für DEY
-void test_DEY() {
+void testDey() {
     cpu.Y = 0x01; // Setze Y auf 0x01
     cpu.PC = 0x00;
 
@@ -88,17 +88,17 @@ void test_DEY() {
 }
 
 
-void dec_test() {
+void decTest() {
     memset(&cpu, 0, sizeof(cpu)); // CPU zurücksetzen
 
     printf("Running DEC Operations Tests...\n");
 
-    test_DEC_Zero_Page();
-    test_DEC_Zero_Page_X();
-    test_DEC_Absolute();
-    test_DEC_Absolute_X();
-    test_DEX();
-    test_DEY();
+    testDec_zero_page();
+    testDec_zero_page_x();
+    testDec_absolute();
+    testDec_absolute_x();
+    testDex();
+    testDey();
 
     printf("All DEC Operations Tests Completed.\n");
 

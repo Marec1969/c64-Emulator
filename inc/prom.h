@@ -1371,6 +1371,6 @@ const unsigned char prom[] = {
     0xE2, 0xFC, 0x48, 0xFF, 
 };
 
-const unsigned int prom_len = 16384;
+const unsigned int promLen = 16384;
 
 #endif // PROM_H

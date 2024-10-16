@@ -1,70 +1,63 @@
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <windows.h>
 
 #include "mainWin.h"
-
 #include "cpurunner.h"
 #include "vic.h"
 
+// Function prototypes
+void* mainLoop(void* arg); // Thread function for the main loop
+void* messageLoop(void* arg); // Thread function for message processing
 
-
-// Funktionsprototypen
-void* main_loop(void* arg); // Threadfunktion für die Hauptschleife
-void* message_loop(void* arg); // Threadfunktion für die Nachrichtenverarbeitung
-
-// Globale Variable zur Kontrolle der Threads
+// Global variable to control threads
 volatile int running = 1;
 
 void mainStop(void) {
-    running=0;
+    running = 0;
 }
 
 int mainRunning(void) {
     return running;
 }
 
-// Hauptfunktion
+// Main function
 int main() {
     pthread_t mainThread, msgThread;
-
     
     cpuRunnerInit();
 
-
-    // Erstellen des Threads für die Hauptschleife
-    if (pthread_create(&mainThread, NULL, main_loop, NULL)) {
-        fprintf(stderr, "Fehler beim Erstellen des Hauptschleifen-Threads\n");
+    // Creating the thread for the main loop
+    if (pthread_create(&mainThread, NULL, mainLoop, NULL)) {
+        fprintf(stderr, "Error creating main loop thread");
         return 1;
     }
 
-    // Erstellen des Threads für die Nachrichtenverarbeitung
-    
-    if (pthread_create(&msgThread, NULL, message_loop, NULL)) {
-        fprintf(stderr, "Fehler beim Erstellen des Nachrichtenverarbeitungs-Threads\n");
+    // Creating the thread for message processing
+    if (pthread_create(&msgThread, NULL, messageLoop, NULL)) {
+        fprintf(stderr, "Error creating message loop thread");
         return 1;
     }
-    
 
-    // Warten auf den Abbruch der Threads
-    pthread_join(mainThread, NULL); // Warten auf den Hauptschleifen-Thread
-    pthread_join(msgThread, NULL);  // Warten auf den Nachrichtenverarbeitungs-Thread
+    // Waiting for the termination of the threads
+    pthread_join(mainThread, NULL); // Waiting for the main loop thread
+    pthread_join(msgThread, NULL);  // Waiting for the message processing thread
 
     return 0;
 }
 
-// Threadfunktion für die Hauptschleife
-void* main_loop(void* arg) {
-    printf("Die Hauptschleife wird ausgeführt...\n");
+// Thread function for the main loop
+void* mainLoop(void* arg) {
+    printf("The main loop is running...");
     cpuRunnerDo();
-    return NULL; // Thread beenden
+    return NULL; // End thread
 }
 
-// Dummy-Threadfunktion für die Nachrichtenverarbeitung
-void* message_loop(void* arg) {
+// Dummy thread function for message processing
+void* messageLoop(void* arg) {
     runMainWindow();
-    return NULL; // Thread beenden
+    return NULL; // End thread
 }

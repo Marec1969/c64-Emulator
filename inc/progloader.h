@@ -1,8 +1,8 @@
 #ifndef PROGLOADER_H
 #define PROGLOADER_H
 
-void load_Flaschbier(void);
-void load_neptun(void);
+void loadFlaschbier(void);
+void loadNeptun(void);
 
 
 #endif

@@ -49,19 +49,19 @@ typedef struct {
                           // Adresse: 0xDC07 (CIA 1), 0xDD07 (CIA 2)
                           // 16-bit Timer B (frei programmierbar, Countdown)
 
-    uint8_t tod_tenth;    // Time of Day Clock (TOD), Zehntelsekunden
+    uint8_t todTenth;    // Time of Day Clock (TOD), Zehntelsekunden
                           // Adresse: 0xDC08 (CIA 1), 0xDD08 (CIA 2)
                           // Bit 7-0: Zehntelsekunden
 
-    uint8_t tod_sec;      // Time of Day Clock (TOD), Sekunden
+    uint8_t todSec;      // Time of Day Clock (TOD), Sekunden
                           // Adresse: 0xDC09 (CIA 1), 0xDD09 (CIA 2)
                           // Bit 7-0: Sekunden (00-59)
 
-    uint8_t tod_min;      // Time of Day Clock (TOD), Minuten
+    uint8_t todMin;      // Time of Day Clock (TOD), Minuten
                           // Adresse: 0xDC0A (CIA 1), 0xDD0A (CIA 2)
                           // Bit 7-0: Minuten (00-59)
 
-    uint8_t tod_hr;       // Time of Day Clock (TOD), Stunden
+    uint8_t todHr;       // Time of Day Clock (TOD), Stunden
                           // Adresse: 0xDC0B (CIA 1), 0xDD0B (CIA 2)
                           // Bit 7-0: Stunden (00-23 im 24-Stunden-Format)
 
@@ -143,7 +143,7 @@ typedef struct {
 } portKeyMap_t;
 
 extern portKeyMap_t portKeyMap;
-extern uint16_t cia_timer_ctrl;
+extern uint16_t ciaTimer_ctrl;
 
 
 #define CIA1ADDR   0xDC00  // Adresse für CIA 1
@@ -151,12 +151,12 @@ extern uint16_t cia_timer_ctrl;
 #define CIA2ADDR   0xDD00  // Adresse für CIA 2
 #define CIA2END    0xDD0F 
 
-extern uint8_t cia_getVidoeBank(void);
-extern void write_cia1(uint16_t addr,uint8_t value); 
-extern void write_cia2(uint16_t addr,uint8_t value); 
-extern uint8_t read_cia1(uint16_t addr); 
-extern uint8_t read_cia2(uint16_t addr); 
-extern void update_aic(uint8_t clkCount);
+extern uint8_t ciaGetvidoebank(void);
+extern void writeCia1(uint16_t addr,uint8_t value); 
+extern void writeCia2(uint16_t addr,uint8_t value); 
+extern uint8_t readCia1(uint16_t addr); 
+extern uint8_t readCia2(uint16_t addr); 
+extern void updateAic(uint8_t clkCount);
 extern void writeCAItoTxtFile(void);
 extern int writeCAItoFile(const char *,CIA * cia);
 

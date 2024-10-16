@@ -10,7 +10,7 @@ void OPCODE_70(void) {
     // BVS (Branch if Overflow Set)
     cpu.PC++;
     if (cpu.SR & FLAG_OVERFLOW) {
-        cpu.PC += (int8_t)read_memory(cpu.PC);
+        cpu.PC += (int8_t)readMemory(cpu.PC);
         cpu.PC++;
     } else {
       cpu.PC++;
@@ -22,7 +22,7 @@ void OPCODE_71(void) {
     // ADC (Indirect),Y
     uint16_t addr = addrIndirect_Y(); // Verwende addrIndirect für die Adresse
     // printf("Addr %04x\r\n",addr);
-    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    uint8_t value = readMemory(addr); // Lese den Wert von der berechneten Adresse
     ADC_A(value);
     cpu.PC++;
 }
@@ -36,14 +36,14 @@ void OPCODE_72(void) {
 void OPCODE_74(void) {
     // STY Zero Page,X
     uint8_t addr = addrZeropageX(); // Verwende addrZeropageX für die Adresse
-    write_memory(addr, cpu.Y);
+    writeMemory(addr, cpu.Y);
     cpu.PC++;
 }
 
 void OPCODE_75(void) {
     // ADC Zero Page,X
     uint8_t addr = addrZeropageX(); // Verwende addrZeropageX für die Adresse
-    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    uint8_t value = readMemory(addr); // Lese den Wert von der berechneten Adresse
     ADC_A(value); // Führe die Addition durch und setze die Flags
     cpu.PC++;
 }
@@ -51,10 +51,10 @@ void OPCODE_75(void) {
 void OPCODE_76(void) {
     // ROR Zero Page,X
     uint8_t addr = addrZeropageX(); // Verwende addrZeropageX für die Adresse
-    uint8_t value = read_memory(addr);
+    uint8_t value = readMemory(addr);
 
     value = ROR (value);
-    write_memory(addr,value);
+    writeMemory(addr,value);
     cpu.PC++;
 }
 
@@ -67,7 +67,7 @@ void OPCODE_78(void) {
 void OPCODE_79(void) {
     // ADC Absolute,Y
     uint16_t addr = addrAbsulutY(); // Verwende addrAbsulut für die Adresse
-    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    uint8_t value = readMemory(addr); // Lese den Wert von der berechneten Adresse
     ADC_A(value); // Führe die Addition durch und setze die Flags
     cpu.PC++;
 }
@@ -75,7 +75,7 @@ void OPCODE_79(void) {
 void OPCODE_7D(void) {
     // ADC Absolute,X
     uint16_t addr = addrAbsulutX(); // Verwende addrAbsulutX für die Adresse
-    uint8_t value = read_memory(addr); // Lese den Wert von der berechneten Adresse
+    uint8_t value = readMemory(addr); // Lese den Wert von der berechneten Adresse
     ADC_A(value); // Führe die Addition durch und setze die Flags
     cpu.PC++;
 }
@@ -83,9 +83,9 @@ void OPCODE_7D(void) {
 void OPCODE_7E(void) {
     // ROR Absolute,X
     uint16_t addr = addrAbsulutX(); // Verwende addrAbsulutX für die Adresse
-    uint8_t value = read_memory(addr);
+    uint8_t value = readMemory(addr);
 
     value = ROR(value);
-    write_memory(addr,value);
+    writeMemory(addr,value);
     cpu.PC++;
 }

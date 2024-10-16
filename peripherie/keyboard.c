@@ -22,11 +22,11 @@ void keyMapDown(int ascii,int rawKey) {
     if ((rawKey>=120) && (rawKey<124)) {
         switch(rawKey) {
             case 123:
-                load_Flaschbier();
+                loadFlaschbier();
                 break;
             case 122:
                 // show = 150;
-                load_neptun();
+                loadNeptun();
                 break;                
             case 120:
                     useStick = 1 - useStick;

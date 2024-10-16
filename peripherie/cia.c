@@ -19,9 +19,9 @@ portKeyMap_t portKeyMap;
 const uint8_t portNrToBitMap[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
 
-uint16_t cia_timer_ctrl=0;
+uint16_t ciaTimer_ctrl=0;
 
-void write_cia1(uint16_t adresse,uint8_t value) {
+void writeCia1(uint16_t adresse,uint8_t value) {
     switch (adresse) {
         case 0xDC00:  // Adresse: 0xDC00 (CIA 1)
                       // Port A Data Register
@@ -81,25 +81,25 @@ void write_cia1(uint16_t adresse,uint8_t value) {
         case 0xDC08:  // Adresse: 0xDC08 (CIA 1)
                       // Time of Day Clock (TOD), Zehntelsekunden
                       // Bit 7-0: Zehntelsekunden
-            cia1.tod_tenth = value;
+            cia1.todTenth = value;
             break;
 
         case 0xDC09:  // Adresse: 0xDC09 (CIA 1)
                       // Time of Day Clock (TOD), Sekunden
                       // Bit 7-0: Sekunden (00-59)
-            cia1.tod_sec = value;
+            cia1.todSec = value;
             break;
 
         case 0xDC0A:  // Adresse: 0xDC0A (CIA 1)
                       // Time of Day Clock (TOD), Minuten
                       // Bit 7-0: Minuten (00-59)
-            cia1.tod_min = value;
+            cia1.todMin = value;
             break;
 
         case 0xDC0B:  // Adresse: 0xDC0B (CIA 1)
                       // Time of Day Clock (TOD), Stunden
                       // Bit 7-0: Stunden (00-23 im 24-Stunden-Format)
-            cia1.tod_hr = value;
+            cia1.todHr = value;
             break;
 
         case 0xDC0C:  // Adresse: 0xDC0C (CIA 1)
@@ -134,12 +134,12 @@ void write_cia1(uint16_t adresse,uint8_t value) {
                       // Bit 6: Richtung des seriellen Schieberegisters, 0 = SP-Pin ist Eingang (lesen), 1 = SP-Pin ist Ausgang (schreiben)
                       // Bit 7: Echtzeituhr, 0 = 60 Hz, 1 = 50 Hz an Pin 19
             if (value & 0x01) {
-                cia_timer_ctrl |= TIMERA1_RUN;
+                ciaTimer_ctrl |= TIMERA1_RUN;
             }
             if (value & 0x08) {
-                cia_timer_ctrl &= ~TIMERA1_RELOAD;
+                ciaTimer_ctrl &= ~TIMERA1_RELOAD;
             } else {
-                cia_timer_ctrl |= TIMERA1_RELOAD;
+                ciaTimer_ctrl |= TIMERA1_RELOAD;
             }
             if (value & 0x10) {
                 cia1.timerA = cia1.reloadTimerA;
@@ -165,12 +165,12 @@ void write_cia1(uint16_t adresse,uint8_t value) {
                       // %11 = vom Unterlauf des Timer A, wenn CNT-Pin High ist
                       // Bit 7: 0 = Schreiben in die TOD-Register setzt die Uhrzeit, 1 = Schreiben in die TOD-Register setzt die Alarmzeit
             if (value & 0x01) {
-                cia_timer_ctrl |= TIMERB1_RUN;
+                ciaTimer_ctrl |= TIMERB1_RUN;
             }
             if (value & 0x08) {
-                cia_timer_ctrl &= ~TIMERB1_RELOAD;
+                ciaTimer_ctrl &= ~TIMERB1_RELOAD;
             } else {
-                cia_timer_ctrl |= TIMERB1_RELOAD;
+                ciaTimer_ctrl |= TIMERB1_RELOAD;
             }
             if (value & 0x10) {
                 cia1.timerB = cia1.reloadTimerB;
@@ -188,7 +188,7 @@ void write_cia1(uint16_t adresse,uint8_t value) {
     }
 }
 
-void write_cia2(uint16_t adresse,uint8_t value) {
+void writeCia2(uint16_t adresse,uint8_t value) {
     switch (adresse) {
         case 0xDD00:  // Adresse: 0xDD00 (CIA 2)
                       // Port A Data Register
@@ -246,25 +246,25 @@ void write_cia2(uint16_t adresse,uint8_t value) {
         case 0xDD08:  // Adresse: 0xDD08 (CIA 2)
                       // Time of Day Clock (TOD), Zehntelsekunden
                       // Bit 7-0: Zehntelsekunden
-            cia2.tod_tenth = value;
+            cia2.todTenth = value;
             break;
 
         case 0xDD09:  // Adresse: 0xDD09 (CIA 2)
                       // Time of Day Clock (TOD), Sekunden
                       // Bit 7-0: Sekunden (00-59)
-            cia2.tod_sec = value;
+            cia2.todSec = value;
             break;
 
         case 0xDD0A:  // Adresse: 0xDD0A (CIA 2)
                       // Time of Day Clock (TOD), Minuten
                       // Bit 7-0: Minuten (00-59)
-            cia2.tod_min = value;
+            cia2.todMin = value;
             break;
 
         case 0xDD0B:  // Adresse: 0xDD0B (CIA 2)
                       // Time of Day Clock (TOD), Stunden
                       // Bit 7-0: Stunden (00-23 im 24-Stunden-Format)
-            cia2.tod_hr = value;
+            cia2.todHr = value;
             break;
 
         case 0xDD0C:  // Adresse: 0xDD0C (CIA 2)
@@ -299,12 +299,12 @@ void write_cia2(uint16_t adresse,uint8_t value) {
                       // Bit 6: Richtung des seriellen Schieberegisters, 0 = SP-Pin ist Eingang (lesen), 1 = SP-Pin ist Ausgang (schreiben)
                       // Bit 7: Echtzeituhr, 0 = 60 Hz, 1 = 50 Hz an Pin 19
             if (value & 0x01) {
-                cia_timer_ctrl |= TIMERA2_RUN;
+                ciaTimer_ctrl |= TIMERA2_RUN;
             }
             if (value & 0x08) {
-                cia_timer_ctrl &= ~TIMERA2_RELOAD;
+                ciaTimer_ctrl &= ~TIMERA2_RELOAD;
             } else {
-                cia_timer_ctrl |= TIMERA2_RELOAD;
+                ciaTimer_ctrl |= TIMERA2_RELOAD;
             }
             if (value & 0x10) {
                 cia2.timerA = cia2.reloadTimerA;
@@ -330,12 +330,12 @@ void write_cia2(uint16_t adresse,uint8_t value) {
                       // %11 = vom Unterlauf des Timer A, wenn CNT-Pin High ist
                       // Bit 7: 0 = Schreiben in die TOD-Register setzt die Uhrzeit, 1 = Schreiben in die TOD-Register setzt die Alarmzeit
             if (value & 0x01) {
-                cia_timer_ctrl |= TIMERB2_RUN;
+                ciaTimer_ctrl |= TIMERB2_RUN;
             }
             if (value & 0x08) {
-                cia_timer_ctrl &= ~TIMERB2_RELOAD;
+                ciaTimer_ctrl &= ~TIMERB2_RELOAD;
             } else {
-                cia_timer_ctrl |= TIMERB2_RELOAD;
+                ciaTimer_ctrl |= TIMERB2_RELOAD;
             }
             if (value & 0x10) {
                 cia2.timerB = cia2.reloadTimerB;
@@ -355,7 +355,7 @@ void write_cia2(uint16_t adresse,uint8_t value) {
 
 
 
-uint8_t read_cia1(uint16_t adresse) {
+uint8_t readCia1(uint16_t adresse) {
     uint8_t value;
     switch (adresse) {
         case 0xDC00:  // Adresse: 0xDC00 (CIA 1)
@@ -433,25 +433,25 @@ uint8_t read_cia1(uint16_t adresse) {
         case 0xDC08:  // Adresse: 0xDC08 (CIA 1)
                       // Time of Day Clock (TOD), Zehntelsekunden
                       // Bit 7-0: Zehntelsekunden
-            value = cia1.tod_tenth;
+            value = cia1.todTenth;
             break;
 
         case 0xDC09:  // Adresse: 0xDC09 (CIA 1)
                       // Time of Day Clock (TOD), Sekunden
                       // Bit 7-0: Sekunden (00-59)
-            value = cia1.tod_sec;
+            value = cia1.todSec;
             break;
 
         case 0xDC0A:  // Adresse: 0xDC0A (CIA 1)
                       // Time of Day Clock (TOD), Minuten
                       // Bit 7-0: Minuten (00-59)
-            value = cia1.tod_min;
+            value = cia1.todMin;
             break;
 
         case 0xDC0B:  // Adresse: 0xDC0B (CIA 1)
                       // Time of Day Clock (TOD), Stunden
                       // Bit 7-0: Stunden (00-23 im 24-Stunden-Format)
-            value = cia1.tod_hr;
+            value = cia1.todHr;
             break;
 
         case 0xDC0C:  // Adresse: 0xDC0C (CIA 1)
@@ -510,7 +510,7 @@ uint8_t read_cia1(uint16_t adresse) {
 
 }
 
-uint8_t read_cia2(uint16_t adresse) {
+uint8_t readCia2(uint16_t adresse) {
     uint8_t value;
 
     switch (adresse) {
@@ -564,25 +564,25 @@ uint8_t read_cia2(uint16_t adresse) {
         case 0xDD08:  // Adresse: 0xDD08 (CIA 2)
                       // Time of Day Clock (TOD), Zehntelsekunden
                       // Bit 7-0: Zehntelsekunden
-            value = cia2.tod_tenth;
+            value = cia2.todTenth;
             break;
 
         case 0xDD09:  // Adresse: 0xDD09 (CIA 2)
                       // Time of Day Clock (TOD), Sekunden
                       // Bit 7-0: Sekunden (00-59)
-            value = cia2.tod_sec;
+            value = cia2.todSec;
             break;
 
         case 0xDD0A:  // Adresse: 0xDD0A (CIA 2)
                       // Time of Day Clock (TOD), Minuten
                       // Bit 7-0: Minuten (00-59)
-            value = cia2.tod_min;
+            value = cia2.todMin;
             break;
 
         case 0xDD0B:  // Adresse: 0xDD0B (CIA 2)
                       // Time of Day Clock (TOD), Stunden
                       // Bit 7-0: Stunden (00-23 im 24-Stunden-Format)
-            value = cia2.tod_hr;
+            value = cia2.todHr;
             break;
 
         case 0xDD0C:  // Adresse: 0xDD0C (CIA 2)
@@ -640,66 +640,66 @@ uint8_t read_cia2(uint16_t adresse) {
 }
 
 
-void update_aic(uint8_t clkCount) {
+void updateAic(uint8_t clkCount) {
 
-    if (cia_timer_ctrl) {
-        if (cia_timer_ctrl & (TIMERA1_RUN) ) {
+    if (ciaTimer_ctrl) {
+        if (ciaTimer_ctrl & (TIMERA1_RUN) ) {
             cia1.timerA -= clkCount;
             if (cia1.timerA<=0) {
                 if (cia1.icrMask & 0x01) {
                     doIRQ = 1;           
                     cia1.icr |= 0x81;     
                 }
-                if (cia_timer_ctrl & TIMERA1_RELOAD ) {
+                if (ciaTimer_ctrl & TIMERA1_RELOAD ) {
                     cia1.timerA = cia1.reloadTimerA;
                 } else {
                     cia1.timerA = 0;
-                    cia_timer_ctrl &= ~TIMERA1_RUN;
+                    ciaTimer_ctrl &= ~TIMERA1_RUN;
                 }
             }
         }
-        if (cia_timer_ctrl & (TIMERB1_RUN) ) {
+        if (ciaTimer_ctrl & (TIMERB1_RUN) ) {
             cia1.timerB -= clkCount;
             if (cia1.timerB<=0) {
                 if (cia1.icrMask & 0x02) {
                     doIRQ = 1;           
                     cia1.icr |= 0x82;     
                 }
-                if (cia_timer_ctrl & TIMERB1_RELOAD ) {
+                if (ciaTimer_ctrl & TIMERB1_RELOAD ) {
                     cia1.timerB= cia1.reloadTimerB;
                 } else {
                     cia1.timerB = 0;
-                    cia_timer_ctrl &= ~TIMERB1_RUN;
+                    ciaTimer_ctrl &= ~TIMERB1_RUN;
                 }
             }
         }
-        if (cia_timer_ctrl & (TIMERA2_RUN) ) {
+        if (ciaTimer_ctrl & (TIMERA2_RUN) ) {
             cia2.timerA -= clkCount;
             if (cia2.timerA<=0) {
                 if (cia2.icrMask & 0x01) {
                     doIRQ = 1;           
                     cia2.icr |= 0x81;     
                 }
-                if (cia_timer_ctrl & TIMERA2_RELOAD ) {
+                if (ciaTimer_ctrl & TIMERA2_RELOAD ) {
                     cia2.timerA = cia2.reloadTimerA;
                 } else {
                     cia2.timerA = 0;
-                    cia_timer_ctrl &= ~TIMERA2_RUN;
+                    ciaTimer_ctrl &= ~TIMERA2_RUN;
                 }
             }
         }
-        if (cia_timer_ctrl & (TIMERB2_RUN) ) {
+        if (ciaTimer_ctrl & (TIMERB2_RUN) ) {
             cia2.timerB -= clkCount;
             if (cia2.timerB<=0) {
                 if (cia2.icrMask & 0x02) {
                     doIRQ = 1;           
                     cia2.icr |= 0x82;     
                 }
-                if (cia_timer_ctrl & TIMERB2_RELOAD ) {
+                if (ciaTimer_ctrl & TIMERB2_RELOAD ) {
                     cia2.timerB= cia2.reloadTimerB;
                 } else {
                     cia2.timerB = 0;
-                    cia_timer_ctrl &= ~TIMERB2_RUN;
+                    ciaTimer_ctrl &= ~TIMERB2_RUN;
                 }
             }
         }
@@ -711,7 +711,7 @@ void update_aic(uint8_t clkCount) {
 
 }
 
-uint8_t cia_getVidoeBank(void) {
+uint8_t ciaGetvidoebank(void) {
     uint8_t bank;
     bank = (~cia2.pra) & 0x03;    
     return(bank);
