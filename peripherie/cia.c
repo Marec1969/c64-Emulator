@@ -28,6 +28,7 @@ void write_cia1(uint16_t adresse,uint8_t value) {
                       // Bit 7-0: I/O Pins von Port A
                       // Angeschlossen als Spannngsausgang für Tastatur
             cia1.pra = value;
+            // printf("Write A %02X \n",value);
             break;
 
         case 0xDC01:  // Adresse: 0xDC01 (CIA 1)
@@ -363,18 +364,17 @@ uint8_t read_cia1(uint16_t adresse) {
                      //   printf("read port a  ddr %02X\n",cia1.ddra);
                     // printf("Read Stick1 %02x\n",portKeyMap.stick1);
                       //if (portKeyMap.lifeTime>0) {
-                    if (portKeyMap.stick1) {
-                            cia1.pra = ~portKeyMap.stick1;
-                        
-                      } else {
-                        cia1.pra = 0xff;
-                      }
+            if (portKeyMap.stick1) {
+                return   ~portKeyMap.stick1 & cia1.pra;                        
+            } 
             value = cia1.pra;
-            break;
-
+          
         case 0xDC01:  // Adresse: 0xDC01 (CIA 1)
                       // Port B Data Register
                       // Bit 7-0: I/O Pins von Port B
+            if (portKeyMap.stick2) {
+                return  ~portKeyMap.stick2;
+            } 
 
             cia1.prb = 0xff;
 

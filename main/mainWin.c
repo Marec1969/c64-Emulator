@@ -27,17 +27,36 @@ RGBQUAD farben[] = {
     {0x77, 0x77, 0x77, 0x00}, // Mittelgrau
     {0x66, 0xFF, 0xAA, 0x00}, // Hellgrün
     {0xFF, 0x88, 0x00, 0x00}, // Hellblau
+    {0xBB, 0xBB, 0xBB, 0x00},  // Hellgrau
+
+// den Farbsatz verdoppeln, damit das Bit 4 (0x10) für die Hintergrundkollisionserkennung genutzt werden kann
+    {0x00, 0x00, 0x00, 0x00},  // Schwarz
+    {0xFF, 0xFF, 0xFF, 0x00},  // Weiß
+    {0x00, 0x00, 0x88, 0x00},  // Rot
+    {0xEE, 0xFF, 0xAA, 0x00},  // Türkis
+    {0xCC, 0x44, 0xCC, 0x00},  // Violett
+    {0x55, 0xCC, 0x00, 0x00},  // Grün
+    {0xAA, 0x00, 0x00, 0x00},  // Blau
+    {0x77, 0xEE, 0xEE, 0x00},  // Gelb
+    {0x55, 0x88, 0xDD, 0x00},  // Orange
+    {0x00, 0x44, 0x66, 0x00},  // Braun
+    {0x77, 0x77, 0xFF, 0x00}, // Hellrot
+    {0x33, 0x33, 0x33, 0x00}, // Dunkelgrau
+    {0x77, 0x77, 0x77, 0x00}, // Mittelgrau
+    {0x66, 0xFF, 0xAA, 0x00}, // Hellgrün
+    {0xFF, 0x88, 0x00, 0x00}, // Hellblau
     {0xBB, 0xBB, 0xBB, 0x00}  // Hellgrau
+
 };
 
 
 
 typedef struct {
     BITMAPINFOHEADER bmiHeader;
-    RGBQUAD bmiColors[16];
-} BITMAPINFO_16COLORS;
+    RGBQUAD bmiColors[32];
+} BITMAPINFO_32COLORS;
 
-BITMAPINFO_16COLORS bmiColor;
+BITMAPINFO_32COLORS bmiColor;
 
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -101,7 +120,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 
 void initBMI() {
-    ZeroMemory(&bmiColor, sizeof(BITMAPINFO_16COLORS));
+    ZeroMemory(&bmiColor, sizeof(BITMAPINFO_32COLORS));
     bmiColor.bmiHeader.biSize     = sizeof(BITMAPINFOHEADER);
     bmiColor.bmiHeader.biWidth = PAL_B_X;
     bmiColor.bmiHeader.biHeight = -PAL_B_Y; // Negative Höhe für Top-Down Bitmap
@@ -110,7 +129,7 @@ void initBMI() {
     bmiColor.bmiHeader.biCompression = BI_RGB;
 
     // Farbpalette in der bmiColors festlegen
-    for (int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 32; ++i) {
         bmiColor.bmiColors[i] = farben[i];
     }
 
@@ -118,60 +137,6 @@ void initBMI() {
 
 }
 
-#if 0
-
-// Hauptfunktion
-int runMainWindow(void) {
-    // Fensterklassenstruktur initialisieren
-    const char CLASS_NAME[] = "SimpleWindowClass";
-
-    WNDCLASS wc = { 0 };
-
-    // prepareAllBitmaps();
-
-    wc.lpfnWndProc = WindowProc; // Fensterprozedur
-    wc.hInstance = GetModuleHandle(NULL);
-    wc.lpszClassName = CLASS_NAME;
-
-    // Fensterklasse registrieren
-    RegisterClass(&wc);
-
-    initBMI();
-
-    // Ein Fenster erstellen
-    HWND hwnd = CreateWindowEx(
-        0,                              // Erweiterter Fensterstil
-        CLASS_NAME,                     // Fensterklasse
-        "Simple Graphics Window",        // Fenstertitel
-        WS_OVERLAPPEDWINDOW,            // Fensterstil
-        CW_USEDEFAULT, CW_USEDEFAULT,    // Anfangsposition
-        400, 300,                       // Breite und Höhe
-        NULL,                           // Übergeordnetes Fenster
-        NULL,                           // Menü
-        wc.hInstance,                  // Instanzhandle
-        NULL                            // Zusätzliche anwendungsspezifische Daten
-    );
-
-    if (hwnd == NULL) {
-        return 0;
-    }
-
-    windowHandle = hwnd;
-
-    // Fenster anzeigen
-    ShowWindow(hwnd, SW_SHOW);
-
-    // Nachrichten-Schleife
-    MSG msg = { 0 };
-    while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-     
-    return 0;
-}
-
-#endif
 // Hauptfunktion
 int runMainWindow(void) {
     // Fensterklassenstruktur initialisieren

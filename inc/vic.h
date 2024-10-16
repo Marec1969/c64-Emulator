@@ -50,8 +50,8 @@
 // 6567R8	    NTSC-M	        263	            235	                65	            418
 // 6569	        PAL-B	        312	            284             	63	            403
 
-#define PAL_B_Y	  284
-#define PAL_B_X   404
+#define PAL_B_Y	  280
+#define PAL_B_X   400
 
 // Typ	            Erste   Letzte          Erste X-Koo.    Erste sichtbare     Letzte sichtbare
 //          V-Blank-Zeile	V-Blank-Zeile	einer Zeile     X-Koordinate        X-Koordinate
@@ -64,12 +64,17 @@
 // einer Zeile” angegebenen. Die X-Koordinaten laufen innerhalb der Zeile bis $1ff (beim 6569 nur bis $1f7),
 // dann erst kommt X-Koordinate 0. 
 
-#define BR_LEFT   ((404-320)/2)
-#define BR_TOP    ((284-200)/2)
-#define BR_RIGHT  (404-BR_LEFT)
-#define BR_BOTTOM (284 - BR_TOP) 
+#define BR_LEFT   (40)
+#define BR_TOP    (40)
+#define BR_RIGHT  (400-40)
+#define BR_BOTTOM (280 - 40) 
+
+#define VISIBLE_SPRITE_POS_X 24
+#define VISIBLE_SPRITE_POS_Y 50
 
 
+#define SPRITE_OFFSET_X (BR_LEFT-VISIBLE_SPRITE_POS_X)
+#define SPRITE_OFFSET_Y (BR_TOP-VISIBLE_SPRITE_POS_Y)
 
 // #define VIC_LINES_CNT   312
 #define VIC_VIB_LINE    300 
@@ -162,7 +167,7 @@ typedef struct {
     uint8_t irq_mask;
     
     // $D01B: Sprite Priorität (0 = vor Hintergrund, 1 = hinter Hintergrund) (Bit-Nr. = Sprite-Nr.)
-    uint8_t sprite_priority;
+    uint8_t sprite_background_priority;
     
     // $D01C: Sprite Multicolor-Modus (0 = Hi-Res, 1 = Multicolor) (Bit-Nr. = Sprite-Nr.)
     uint8_t sprite_multicolor;

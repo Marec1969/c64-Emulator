@@ -13,6 +13,10 @@
 #define INLUDE_KEYMAP
 #include "keymap.h"
 
+int useStick=0;
+
+extern int show;
+
 void keyMapDown(int ascii,int rawKey) {
 
     if ((rawKey>=120) && (rawKey<124)) {
@@ -21,10 +25,29 @@ void keyMapDown(int ascii,int rawKey) {
                 load_Flaschbier();
                 break;
             case 122:
+                // show = 150;
                 load_neptun();
+                break;                
+            case 120:
+                    useStick = 1 - useStick;
+                    printf("Use Joystick %d\n",useStick);
                 break;                
         }
         return;
+    }
+
+    if (useStick) {
+        for (int i=0;i<sizeof(stickMappingsWParam)/sizeof(stickMappingsWParam[0]);i++) {
+            if (rawKey==stickMappingsWParam[i].keycode) {
+                if (i<5) {
+                    portKeyMap.stick1 |= stickMappingsWParam[i].portA1; 
+                } else {
+                    portKeyMap.stick2 |= stickMappingsWParam[i].portB1; 
+                }
+                return;
+            }
+        }
+        // return;
     }
 
     if (portKeyMap.lifeTime<=0)  {
@@ -53,24 +76,23 @@ void keyMapDown(int ascii,int rawKey) {
                         return;
                     }
                 }
-                for (int i=0;i<sizeof(stickMappingsWParam)/sizeof(stickMappingsWParam[0]);i++) {
-                    if (rawKey==stickMappingsWParam[i].keycode) {
-                        // portKeyMap.lifeTime = 100000; // 100ms
-                        portKeyMap.stick1 |= stickMappingsWParam[i].portA1;
-                        // printf("%d   %02x\n",wParam,portKeyMap.stick1);
-                        return;
-                    }
-                }
             }
         }
     }
 }
 
 void keyMapUp(int rawKey) {
-    for (int i=0;i<sizeof(stickMappingsWParam)/sizeof(stickMappingsWParam[0]);i++) {
-        if (rawKey==stickMappingsWParam[i].keycode) {
-            portKeyMap.stick1 &= ~stickMappingsWParam[i].portA1;
-            return;
+
+    if (useStick) {
+        for (int i=0;i<sizeof(stickMappingsWParam)/sizeof(stickMappingsWParam[0]);i++) {
+            if (rawKey==stickMappingsWParam[i].keycode) {
+                if (i<5) {
+                    portKeyMap.stick1 &= ~stickMappingsWParam[i].portA1; 
+                } else {
+                    portKeyMap.stick2 &= ~stickMappingsWParam[i].portB1; 
+                }
+                return;
+            }
         }
     }
 }

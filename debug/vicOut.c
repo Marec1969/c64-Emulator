@@ -126,7 +126,7 @@ void write_vic_registers_to_file(void) {
     fprintf(file, "\t\t\t\t\tBit 1: Sprite-background collision IRQ enable\n\t\t\t\t\tBit 0: Raster IRQ enable\n");
 
     // $D01B: Sprite Priority
-    fprintf(file, "$D01B\tSprite Priority\t\t0x%02X\t\tBit 0-7: Sprite priority (1=behind background)\n", regs->sprite_priority);
+    fprintf(file, "$D01B\tSprite Priority\t\t0x%02X\t\tBit 0-7: Sprite priority (1=behind background)\n", regs->sprite_background_priority);
 
     // $D01C: Sprite Multicolor Mode
     fprintf(file, "$D01C\tSprite Multicolor Mode\t0x%02X\t\tBit 0-7: Sprite multicolor mode (1=multicolor)\n", regs->sprite_multicolor);

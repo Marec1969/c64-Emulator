@@ -26,6 +26,7 @@
 extern uint64_t gesTsc;
 
 int run=0;
+int show = 0;
 
 uint8_t memory[MEMORY_SIZE];  // Speicher
 uint8_t rom[MEMORY_SIZE];  // Speicher
@@ -72,7 +73,6 @@ void cpuRunnerDo(void) {
 uint8_t OPCODE;
 static  int oldptr;
 static uint32_t clkCount=0;
-static int show = 0;
 int run = 0;
 int irqCnt=0;
   show = 0;
@@ -127,10 +127,11 @@ int irqCnt=0;
 
 #ifndef MEASURE_PERFORMANZE            
 
-        if (cpu.PC == 0xEAB3) {
-          // show = 50;
+/*
+        if ((cpu.PC >= 0xEAB0) && (cpu.PC < 0xEAB2)) {
+          show = 150;
         }
-
+*/
         if(show) {
             show--;
             if (show==0) mainStop();
