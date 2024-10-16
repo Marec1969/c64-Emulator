@@ -3,6 +3,7 @@
 
 void loadFlaschbier(void);
 void loadNeptun(void);
+void loadGhost(void);
 
 
 #endif

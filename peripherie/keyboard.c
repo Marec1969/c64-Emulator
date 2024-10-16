@@ -26,7 +26,8 @@ void keyMapDown(int ascii,int rawKey) {
                 break;
             case 122:
                 // show = 150;
-                loadNeptun();
+                // loadNeptun();                
+                loadGhost();
                 break;                
             case 120:
                     useStick = 1 - useStick;

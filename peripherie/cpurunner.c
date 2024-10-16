@@ -4,7 +4,7 @@
 #include <string.h>
 
 
-// #define MEASURE_PERFORMANZE
+#define MEASURE_PERFORMANZE
 
 #ifdef MEASURE_PERFORMANZE            
 #include <windows.h>
@@ -105,7 +105,7 @@ int irqCnt=0;
             printf("Zeit: %3.2f Sekunden\n", elapsed);
 #endif 
 
-            printf("TSC-Differenz: %3.3f Zyklen\n", (double)(gesTsc)*0.4e-9);
+            printf("TSC-Differenz: %3.3f Zyklen\n", (double)(gesTsc)*0.4e-9*0.45);
 
             printf("Ende at %d   time %3.2fS   irq Cnt=%d\r\n",run,(double)clkCount * 1e-6,irqCnt);
 
@@ -127,11 +127,6 @@ int irqCnt=0;
 
 #ifndef MEASURE_PERFORMANZE            
 
-/*
-        if ((cpu.PC >= 0xEAB0) && (cpu.PC < 0xEAB2)) {
-          show = 150;
-        }
-*/
         if(show) {
             show--;
             if (show==0) mainStop();

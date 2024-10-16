@@ -55,13 +55,24 @@ void writeVic(uint16_t addr,uint8_t value) {
         // reloadBitmap(addr);        
     }
 
-    if (addr == 0xD01A) {
-        // printf("VIC Mask %02x\n",value);
+    if (addr == 0xD011) {
+        vicRegisters.rasterCMP = vicRegisters.rasterCMP & 0x1ff; // nur vorsichtshalber
+        if (value & 0x80) {
+            vicRegisters.rasterCMP |=  0x100;
+        } else {
+            vicRegisters.rasterCMP &= ~0x0100;
+        }
+    }
+
+
+    if (addr == 0xD012) {
+        vicRegisters.rasterCMP = vicRegisters.rasterCMP & 0x1ff; // nur vorsichtshalber
+        vicRegisters.rasterCMP |= value;
     }
 
     if (addr == 0xD019) {
         // printf("VIC Set IQR %02x\n",value);
-        vicRegisters.irqStatus = vicRegisters.irqStatus & ~value;
+        vicRegisters.irqStatus = (vicRegisters.irqStatus &0x7f) & ~value;
         return;
     }    
 
@@ -227,14 +238,14 @@ static inline void drawPixel(int16_t rasterPosY, int16_t *spriteX, uint8_t color
 
     if (vicRegisters.spriteBackground_priority&spriteNrMask) {
         checkCollision(collisionBuffer, rasterPosY,*spriteX, spriteNrMask);
-        if (windowsScreen[rasterPosY][(*spriteX)] & 0x10) { // Sprite nicht mahlen
+        if (windowsScreen[rasterPosY][(*spriteX)] & 0x10) { // Sprite nicht malen
             spriteX++;
         } else {
             windowsScreen[rasterPosY][(*spriteX)++] = color;
         }
         if (doubleWidth) {
             checkCollision(collisionBuffer, rasterPosY,*spriteX, spriteNrMask);
-            if (windowsScreen[rasterPosY][(*spriteX)] & 0x10) { // Sprite nicht mahlen
+            if (windowsScreen[rasterPosY][(*spriteX)] & 0x10) { // Sprite nicht malen
                 spriteX++;
             } else {
                 windowsScreen[rasterPosY][(*spriteX)++] = color;
@@ -305,6 +316,7 @@ void updateSpriteLine(int16_t rasterPosY) {
     }
 }
 
+#define RASTER_OFFSET 11
 
 void updateVic(uint32_t clkCount) {
     static uint32_t oldRaster;
@@ -312,15 +324,16 @@ void updateVic(uint32_t clkCount) {
 
 
     // static int rast=0;
-    raster = (clkCount / 64) % PAL_B_Y;
+    raster = (clkCount / 63) % PAL_B_MAX_RASTER;
 
     if  (oldRaster != raster) {
 
         startTsc = rdtsc();
-
-        drawCharLine(raster);
-        updateSpriteLine(raster);
-        drawBoarderLine(raster);
+        if ((raster>=RASTER_OFFSET) && (raster<(PAL_B_Y+RASTER_OFFSET)) ){ // die erste Textzeile beginnt bei 51 ; während für den  rahmen nur 40 Zeile gewählt wurden
+            drawCharLine(raster-RASTER_OFFSET);
+            updateSpriteLine(raster-RASTER_OFFSET);
+            drawBoarderLine(raster-RASTER_OFFSET);
+        }
 
         endTsc = rdtsc();
         uint64_t cntTsc = endTsc - startTsc;
@@ -328,23 +341,24 @@ void updateVic(uint32_t clkCount) {
 
 
         vicRegisters.rasterLine = raster & 0xff;
-        if (raster &0x100) {
-            vicRegisters.control1 |= 0x80;
+        if (raster & 0x100) {
+            vicRegisters.control1 |= 0x10;
         } else {
             vicRegisters.control1 &= ~0x80;
         }    
-        if (raster == 310) { 
+
+        if (raster == vicRegisters.rasterCMP) { 
             if (vicRegisters.irqMask & 0x01) {
                 vicRegisters.irqStatus |= 0x81;
                 doIRQ=1;
             }           
         }
 
-        if (raster == (PAL_B_Y-1)) {             
+        if (raster == (PAL_B_MAX_RASTER-1)) {             
             vicUpdateCnt++;
             windowsUpdateScreen(&windowsScreen[0][0]);
             if ((vicUpdateCnt%2)==0) {
-                Sleep(20);
+                Sleep(10);
             } else {
                 Sleep(10);
             }

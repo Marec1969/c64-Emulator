@@ -50,6 +50,9 @@
 // 6567R8	    NTSC-M	        263	            235	                65	            418
 // 6569	        PAL-B	        312	            284             	63	            403
 
+#define PAL_B_MAX_RASTER 312
+
+
 #define PAL_B_Y	  280
 #define PAL_B_X   400
 

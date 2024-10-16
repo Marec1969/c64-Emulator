@@ -172,6 +172,10 @@ void writeVic_registers_to_file(void) {
     // $D030: Mode
     fprintf(file, "$D030\tMode\t\t\t0x%02X\t\tBit 1: Test mode, Bit 0: 1MHz (0) or 2MHz (1)\n", regs->mode);
 
+    fprintf(file, "Raster IRQ (help) = %d\n", regs->rasterCMP);
+
+
+
 #endif
 
 

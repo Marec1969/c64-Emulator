@@ -29,7 +29,6 @@ void OPCODE_2F(void) { illegalOpcode("0x2F", "???"); }
 void OPCODE_32(void) { illegalOpcode("0x32", "KIL"); }
 void OPCODE_33(void) { illegalOpcode("0x33", "NOP"); }
 void OPCODE_34(void) { illegalOpcode("0x34", "NOP"); }
-void OPCODE_39(void) { illegalOpcode("0x39", "NOP"); }
 void OPCODE_3A(void) { illegalOpcode("0x3A", "NOP"); }
 void OPCODE_3B(void) { illegalOpcode("0x3B", "NOP"); }
 void OPCODE_3F(void) { illegalOpcode("0x3F", "NOP"); }

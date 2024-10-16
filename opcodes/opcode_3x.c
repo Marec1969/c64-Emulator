@@ -59,6 +59,16 @@ void OPCODE_38(void) {
     cpu.PC++;
 }
 
+
+void OPCODE_39(void) {
+    // AND Absolute,Y - Logisches UND mit absoluter X-Adressierung
+    uint16_t addr = addrAbsulutY();              // Verwende addrAbsulutY
+    uint8_t value = readMemory(addr);           // Lese den Wert aus dem Speicher
+    AND_A(value);                                // Führe das logische UND auf den Akkumulator aus
+    cpu.PC++;
+}
+
+
 void OPCODE_3C(void) {
     // NOP (Absolute,X) - No Operation mit absoluter X-Adressierung (Illegal Opcode)
     uint16_t addr = addrAbsulutX();              // Verwende addrAbsulutX
