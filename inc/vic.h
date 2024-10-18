@@ -33,6 +33,10 @@
 #define SPRITE_X_SIZE 24
 #define SPRITE_X_BYTE (SPRITE_X_SIZE/8)
 
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGT 200
+
+
 #define SCREENSIZE_BYTE 0x400
 #define MAX_SPRITES 8
 
@@ -53,7 +57,7 @@
 #define PAL_B_MAX_RASTER 312
 
 
-#define PAL_B_Y	  280
+#define PAL_B_Y	  312
 #define PAL_B_X   400
 
 // Typ	            Erste   Letzte          Erste X-Koo.    Erste sichtbare     Letzte sichtbare
@@ -67,10 +71,6 @@
 // einer Zeile” angegebenen. Die X-Koordinaten laufen innerhalb der Zeile bis $1ff (beim 6569 nur bis $1f7),
 // dann erst kommt X-Koordinate 0. 
 
-#define BR_LEFT   (40)
-#define BR_TOP    (40)
-#define BR_RIGHT  (400-40)
-#define BR_BOTTOM (280 - 40) 
 
 #define VISIBLE_SPRITE_POS_X 24
 #define VISIBLE_SPRITE_POS_Y 50
@@ -83,6 +83,12 @@
 #define VIC_VIB_LINE    300 
 #define VIC_MAX_X       343
 #define VIC_MAX_Y       312
+
+#define BR_LEFT   (40)
+#define BR_TOP    (51)
+#define BR_RIGHT  (400-40)
+#define BR_BOTTOM (SCREEN_HEIGT + BR_TOP) 
+
 
 typedef struct {
     // $D000: Sprite 0 X-Position (siehe auch $D010)

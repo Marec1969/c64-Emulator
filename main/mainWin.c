@@ -64,11 +64,14 @@ HWND windowHandle=0;
 
 BITMAPINFO* bmi;
 
-static uint8_t* canvas=0;
+//static uint8_t* canvas=0;
+
+static uint8_t canvas[PAL_B_Y][PAL_B_X];
 
 void   windowsUpdateScreen(uint8_t * screenPtr) {
     if (windowHandle)  {
-        canvas = screenPtr;
+        // canvas = screenPtr;
+        memcpy(&canvas[0][0],screenPtr,PAL_B_Y*PAL_B_X);
         RedrawWindow(windowHandle, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW); // Jetzt sofort neu zeichnen               
     }
 }
@@ -86,7 +89,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
         if (canvas) {
-            SetDIBitsToDevice(hdc, 0, 0,  PAL_B_X, PAL_B_Y, 0, 0, 0, PAL_B_Y, canvas, bmi, DIB_RGB_COLORS);          
+            SetDIBitsToDevice(hdc, 0, 0,  PAL_B_X, PAL_B_Y, 0, 0, 0, PAL_B_Y, &canvas[0][0], bmi, DIB_RGB_COLORS);          
+//            SetDIBitsToDevice(hdc, 0, 0,  PAL_B_X, PAL_B_Y, 0, 0, 0, PAL_B_Y, canvas, bmi, DIB_RGB_COLORS);          
         }
         EndPaint(hwnd, &ps);    
     break;

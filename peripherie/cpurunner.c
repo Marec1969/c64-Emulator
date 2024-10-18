@@ -75,6 +75,7 @@ static  int oldptr;
 static uint32_t clkCount=0;
 int run = 0;
 int irqCnt=0;
+int showHelp=0;
   show = 0;
 
 #ifdef MEASURE_PERFORMANZE            
@@ -112,7 +113,7 @@ int irqCnt=0;
             {
                 extern volatile int vicUpdateCnt;
                 extern volatile int update;
-                printf("Windowupdate = %d   vic update = %d\n",update,vicUpdateCnt);
+                printf("vic update = %d\n",vicUpdateCnt);
             }
 
 
@@ -123,42 +124,46 @@ int irqCnt=0;
             return;
         }
 
-        run++;
-
-#ifndef MEASURE_PERFORMANZE            
-
-        if(show) {
-            show--;
-            if (show==0) mainStop();
-//        if (run>600000) {
-//        if (cpu.SR & 0x08) {
-            printf("%06d\t",run);
-            switch(opcodeLengths[OPCODE]) {
-                case 0:
-                        printf("illegal opcode \r\n%04x\t%02X\t%s\t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],cpu.SP);
-                    exit(0);
-                case 1:
-                        printf("%04x\t%02X\t%s         \t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],cpu.SP);
-                    break;
-                case 2:
-                        printf("%04x\t%02X\t%s %02X      \t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],readMemory(oldptr+1),cpu.SP);
-                    break;
-                case 3:
-                        printf("%04x\t%02X\t%s %02X%02X \t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],readMemory(oldptr+2),readMemory(oldptr+1),cpu.SP);
-                    break;
-            }
-        }
-#endif 
-
         if (doIRQ) {
             if (triggerIrq()) { 
+                if (show) {
+                    showHelp = show;
+                    show=0;
+                }
                 irqCnt++;
                 doIRQ = 0;                
                 OPCODE = readMemory(cpu.PC);
                 // printf("rd %04x  %02x\t%d\n",cpu.PC,OPCODE,run);
             }
         }
+
+        run++;
+        
+        if(showHelp) {        
+            showHelp--;
+            if (show==0) mainStop();
+//        if (run>600000) {
+//        if (cpu.SR & 0x08) {
+// printf("%06d\t",run);
+            switch(opcodeLengths[OPCODE]) {
+                case 0:
+                        printf("illegal opcode \r\n%04x\t%02X\t%s\t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],cpu.X);
+                    exit(0);
+                case 1:
+                        printf("%04x\t%02X\t%s         \t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],cpu.X);
+                    break;
+                case 2:
+                        printf("%04x\t%02X\t%s %02X      \t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],readMemory(oldptr+1),cpu.X);
+                    break;
+                case 3:
+                        printf("%04x\t%02X\t%s %02X%02X \t%02X\r\n",cpu.PC,OPCODE,opcodes[OPCODE],readMemory(oldptr+2),readMemory(oldptr+1),cpu.X);
+                    break;
+            }
+        }
+
+
         jumptable[OPCODE]();  // Direkter Sprung zu der OPCODE-Handler-Funktion        
+
     }
 
 

@@ -17,15 +17,35 @@ int useStick=0;
 
 extern int show;
 
+int addOfY=5;
+int startPrintRaster=0;
+int slowdown=0;
+
 void keyMapDown(int ascii,int rawKey) {
 
-    if ((rawKey>=120) && (rawKey<124)) {
+    if ((rawKey>=116) && (rawKey<124)) {
         switch(rawKey) {
+            case 116:
+                addOfY--;
+                printf("Offset = %d\n",addOfY);
+                break;
+            case 117:
+                addOfY++;
+                printf("Offset = %d\n",addOfY);
+                break;
+            case 118:
+                 show = 100;
+//                startPrintRaster=1;
+                break;
+            case 119:
+                slowdown=1;
+                break;
             case 123:
-                loadFlaschbier();
+                // loadFlaschbier();
+//                loadNeptun();  
+                loadChopli();
                 break;
             case 122:
-                // show = 150;
                 // loadNeptun();                
                 loadGhost();
                 break;                
@@ -48,7 +68,8 @@ void keyMapDown(int ascii,int rawKey) {
                 return;
             }
         }
-        // return;
+        
+        return;
     }
 
     if (portKeyMap.lifeTime<=0)  {

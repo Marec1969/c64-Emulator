@@ -71,4 +71,25 @@ void loadGhost() {
 
 
 
+void loadChopli() {
+    int i;    
+
+    uint16_t startAddr;
+    int dst=0x801;
+
+    startAddr = CHOPLI[72] + (CHOPLI[73] <<8);
+
+    dst  = CHOPLI[66] + (CHOPLI[67] <<8);
+ 
+    printf("Start addr %04X  dest %04X\n",startAddr,dst);
+
+    for (i=0x60;i<sizeof(CHOPLI);i++) {
+         memory[dst++] = CHOPLI[i];
+    }
+    printf("Copy Choplifter (%d) from 0x400 to %04X\n",sizeof(CHOPLI),i);
+ 
+}
+
+
+
 

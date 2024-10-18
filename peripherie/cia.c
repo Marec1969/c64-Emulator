@@ -364,6 +364,7 @@ uint8_t readCia1(uint16_t adresse) {
                      //   printf("read port a  ddr %02X\n",cia1.ddra);
                     // printf("Read Stick1 %02x\n",portKeyMap.stick1);
                       //if (portKeyMap.lifeTime>0) {
+           // printf("R st1 %02X   %02X\n",portKeyMap.stick1 , cia1.pra);
             if (portKeyMap.stick1) {
                 return   ~portKeyMap.stick1 & cia1.pra;                        
             } 
@@ -372,6 +373,7 @@ uint8_t readCia1(uint16_t adresse) {
         case 0xDC01:  // Adresse: 0xDC01 (CIA 1)
                       // Port B Data Register
                       // Bit 7-0: I/O Pins von Port B
+            // printf("R st2 %02X\n",portKeyMap.stick2);
             if (portKeyMap.stick2) {
                 return  ~portKeyMap.stick2;
             } 

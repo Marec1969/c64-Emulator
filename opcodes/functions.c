@@ -38,7 +38,7 @@ uint8_t readMemory(uint16_t addr) {
                 return (readVic(addr));
             } 
             if ((addr >= CIA1ADDR ) && (addr<=CIA1END)) {
-                 // printf("rd cia1 %04x  %02x\r\n",addr,readCia1(addr));
+                  // printf("rd cia1 %04x  %02x\r\n",addr,readCia1(addr));
                  return (readCia1(addr));
             } 
             if ((addr >= CIA2ADDR ) && (addr<=CIA2END)) {
