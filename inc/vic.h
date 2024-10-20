@@ -24,7 +24,8 @@
 #define COLOR_ADDR     0xD800
 #define COLOR_ADDR_END 0xDBE7
 
-#define MULTICOLORTEXT 0x10
+#define MULTICOLORTEXT   0x10
+#define EXTENDEDBACKCOLOR 0x40
 
 #define INDEX_X 0
 #define INDEX_Y 1
