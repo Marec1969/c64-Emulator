@@ -7,6 +7,8 @@
 #include "cpu6510.h"
 #include <vic.h>
 
+extern uint8_t characters[];
+
 void saveMemory(void) {
     // Datei öffnen (oder erstellen) im "w" Modus (write)
     FILE *filePointer = fopen("memory.txt", "w");
@@ -52,17 +54,20 @@ void saveMemory(void) {
             fprintf(filePointer,"%02x ",colormap[cnt]);
             cnt++;
         }
-        fprintf(filePointer,"\t\t\t");
-        cnt -= 32;
+    } 
+
+        fprintf(filePointer,"\n");
+
+    cnt = 0;
+    while (cnt<4096) {
+        fprintf(filePointer,"\n%04x  ",0xd800+cnt);
         for (int j=0;j<32;j++) {
-            if (memory[cnt]>31) {
-                fprintf(filePointer,"%c",colormap[cnt]);
-            } else {
-                fprintf(filePointer," ");
-            }
+            fprintf(filePointer,"%02x ",characters[cnt]);
             cnt++;
         }
     } 
+
+     fprintf(filePointer,"\n");
 
 
     // Datei schließen

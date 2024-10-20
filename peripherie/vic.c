@@ -45,10 +45,34 @@ static uint64_t endTsc = 0;
 static uint64_t startTsc = 0;
 
 
+extern int addOfY;
+extern int startPrintRaster;
+extern int slowdown;
+extern int show;
+
+
+void printBits(unsigned char num) {
+    // Schleife über die Bits von Bit 7 bis Bit 0 (insgesamt 8 Bits)
+    for (int i = 7; i >= 0; i--) {
+        // Prüfen, ob das i-te Bit gesetzt ist, und 1 oder 0 ausgeben
+        printf("%d", (num >> i) & 1);
+    }
+}
+
+
 void writeVic(uint16_t addr,uint8_t value) {
     uint8_t *ptr =  (uint8_t *) &vicRegisters;
 
+
 /*
+    if (addr == 0xD018) {
+        printf("%04X\t",addr);
+        printBits(value);
+        printf("\n");
+
+    }
+
+
     if(addr == 0xd021) {
         printf("%d\t%d\n",vicRegisters.rasterLine, vicRegisters.backgroundColor);
     }
@@ -70,6 +94,12 @@ void writeVic(uint16_t addr,uint8_t value) {
             vicRegisters.rasterCMP &= ~0x0100;
         }
         // printf("Set high %02X to %d\n",value,vicRegisters.rasterCMP);
+    }
+
+
+    if (addr == 0xD018) {        
+        vicRegisters.memoryControl = value;
+         // printf("Set memoryControl %02X\n",value,vicRegisters.memoryControl);
     }
 
 
@@ -154,18 +184,75 @@ static inline void drawMulticolorText(uint8_t fgColor, uint8_t bgColor, uint8_t*
     }
 }
 
+
 static  inline void drawMonochromeText(uint8_t fgColor, uint8_t bgColor, uint8_t* charBitPtr, int bitRow, int col) {
     uint8_t mask = 0x80;
     uint8_t charBits = *charBitPtr++;
     for (int x = 0; x < 8; x++) {
         uint8_t color = (mask & charBits) ? (fgColor | 0x10) : bgColor;
         mask >>= 1;
-        windowsScreen[bitRow][BR_LEFT + col * 8 + x + (vicRegisters.control2 & 0x07)] = color; 
+        windowsScreen[bitRow][BR_LEFT + col * 8  + x + (vicRegisters.control2 & 0x07)] = color; 
     }
 }
 
-static inline uint8_t* getCharBasePtr(uint8_t bank, uint16_t addr, uint16_t bankOffset) {
-    return (((bank == 0) || (bank == 2)) && (addr == 0x1000)) ? &rom[CHAR_ROM_ADDR] : &memory[bankOffset + addr];
+
+static  inline void drawMonochromeGrafik(uint8_t fgColor, uint8_t bgColor, uint8_t* charBitPtr, int bitRow, int col) {
+    uint8_t mask = 0x80;
+    uint8_t charBits = *charBitPtr++;
+    for (int x = 0; x < 8; x++) {
+        uint8_t color = (mask & charBits) ? (fgColor | 0x10) : bgColor;
+        mask >>= 1;
+        windowsScreen[bitRow][BR_LEFT + col * 8  + x + (vicRegisters.control2 & 0x07)] = color; 
+    }
+}
+
+static inline void drawMulticolorGrafik(uint8_t fgColorxx, uint8_t fgColor11, uint8_t bgColor, uint8_t* charBitPtr, int bitRow, int col) {
+    uint8_t mask = 0xC0;
+    uint8_t charBits = *charBitPtr++;
+    for (int x = 0; x < 8; x += 2) {
+        uint8_t color;
+        switch (mask & charBits) {
+            case 0xC0:
+            case 0x30:
+            case 0x0C:
+            case 0x03:
+                color = (fgColor11 & 0x07) | 0x10;
+                break;
+            case 0x80:
+            case 0x20:
+            case 0x08:
+            case 0x02:
+                color = fgColorxx & 0x0f;
+                break;
+            case 0x40:
+            case 0x10:
+            case 0x04:
+            case 0x01:
+                color = ((fgColorxx>>4) & 0x0f) | 0x10;
+                break;
+            default:
+                color = bgColor;
+        }
+        mask >>= 2;
+        windowsScreen[bitRow][BR_LEFT + col * 8 + x + (vicRegisters.control2 & 0x07)]  = color; 
+        windowsScreen[bitRow][BR_LEFT + col * 8 + x + 1 + (vicRegisters.control2 & 0x07)] = color; 
+    }
+}
+
+
+
+static inline uint8_t* getCharBasePtr(uint8_t bank, uint16_t addr, uint16_t bankOffset) {    
+
+    if ((bank == 0) || (bank == 2)) {
+        if (addr == 0x1000) {
+            return &rom[CHAR_ROM_ADDR]; 
+        }
+        if (addr == 0x1800) {
+            return &rom[CHAR_ROM_ADDR+0x800]; 
+        }
+    }
+        
+     return &memory[ bankOffset + addr];
 }
 
 void drawCharLine(uint16_t raster) {
@@ -173,26 +260,30 @@ void drawCharLine(uint16_t raster) {
     static uint8_t colorBuffer[GRID_WIDTH];
     static uint16_t bitRow=BR_TOP;
     static uint16_t charYPos=0;
+    static uint16_t charYRow=0;
+    static uint8_t *charBasePtr = &memory[0];
 
     if ((raster < BR_TOP) || (raster >= BR_BOTTOM) ) return;
 
-       // printf("%02x   %02x\r\n",(vicRegisters.control1 & 0x07) , (raster & 0x07));
-
-
     uint8_t bank = ciaGetvidoebank();
-    uint16_t addr = ((vicRegisters.memoryControl >> 1) & 0x7) * 0x0800;
+    uint16_t addr = ((vicRegisters.memoryControl >> 1) & 0x7) * 0x0800  ;    
     uint16_t bankOffset = bank * 0x4000;
+    uint16_t row = (raster / 8) - (BR_TOP / 8);
 
 
     if ((vicRegisters.control1 & 0x07) == (raster & 0x07) ) {  // This is an Bad-Line :-)
         // printf("Badline %d\n",raster);
         uint16_t screenAddr = bankOffset + ((vicRegisters.memoryControl >> 4) & 0xf) * SCREENSIZE_BYTE;
-        uint16_t row = (raster / 8) - (BR_TOP / 8);
         for (int col = 0; col < GRID_WIDTH; col++) {
             charBuffer[col] = memory[screenAddr + row * GRID_WIDTH + col];
             colorBuffer[col] = colormap[row * GRID_WIDTH + col] & 0x0F;
         }
-
+        charBasePtr = getCharBasePtr(bank, addr, bankOffset);
+        if (row==0) {
+            charYRow = 0;
+        } else {
+            charYRow += GRID_WIDTH * 8;
+        }
         bitRow = raster;
         charYPos = 0;
     } else {
@@ -201,7 +292,6 @@ void drawCharLine(uint16_t raster) {
     }
 
 
-    uint8_t* charBasePtr = getCharBasePtr(bank, addr, bankOffset);
 
     for (int col = 0; col < GRID_WIDTH; col++) {
         uint8_t character = charBuffer[col];
@@ -209,13 +299,23 @@ void drawCharLine(uint16_t raster) {
         uint8_t bgColor = vicRegisters.backgroundColor;
         uint8_t* charBitPtr = charBasePtr + character * 8 + charYPos;
 
+       if (vicRegisters.control1 & C64BITMAP) {
+            uint16_t startAddr = bankOffset + ((vicRegisters.memoryControl >> 3) & 0x1) * 0x2000;
+            uint8_t bitColor = character;            
+            charBitPtr = &memory[startAddr + charYRow + col * 8 + charYPos];
+            if (vicRegisters.control2 & MULTICOLORTEXT)  {
+                drawMulticolorGrafik(bitColor, fgColor, bgColor, charBitPtr, bitRow, col);
+            } else {
+                drawMonochromeGrafik(fgColor, bgColor, charBitPtr, bitRow, col);
+            }
+       } else {
+            if ((vicRegisters.control2 & MULTICOLORTEXT) && (fgColor & 0x08)) {
+                drawMulticolorText(fgColor, bgColor, charBitPtr, bitRow, col);
+            } else {
+                drawMonochromeText(fgColor, bgColor, charBitPtr, bitRow, col);
+            }
 
-        if ((vicRegisters.control2 & MULTICOLORTEXT) && (fgColor & 0x08)) {
-            drawMulticolorText(fgColor, bgColor, charBitPtr, bitRow, col);
-        } else {
-            drawMonochromeText(fgColor, bgColor, charBitPtr, bitRow, col);
-        }
-    
+       }        
     }
 }
 
@@ -329,6 +429,8 @@ void updateSpriteLine(int16_t rasterPosY) {
             int16_t spriteX = vicRegisters.spritePos[spriteNr][INDEX_X]+SPRITE_OFFSET_X; 
             if (vicRegisters.spriteX_msb & spriteNrMask) spriteX += 256;
 
+            if (spriteX>350) continue;
+
             int multicolor = vicRegisters.spriteMulticolor & spriteNrMask;
             uint16_t spritePtr = memory[screenAddr + SCREENSIZE_BYTE - MAX_SPRITES + spriteNr] * 64;
             spritePtr += (doubleHeight ? (distance >> 1) : distance) * SPRITE_X_BYTE;
@@ -354,6 +456,9 @@ void updateSpriteLine(int16_t rasterPosY) {
                         } else spriteX += doubleWidth ? 2 : 1;
                     }
                 }
+                if (spriteX>360) {
+                    printf("PS_X %d  %d  %d  %d\n",spriteX,spriteNr,vicRegisters.spritePos[spriteNr][INDEX_X],(vicRegisters.spriteX_msb & spriteNrMask) );
+                }
             }
         }
     }
@@ -361,9 +466,6 @@ void updateSpriteLine(int16_t rasterPosY) {
 
 #define RASTER_OFFSET 0
 
-extern int addOfY;
-extern int startPrintRaster;
-extern int slowdown;
 
 
 void updateVic(uint32_t clkCount) {
@@ -373,23 +475,44 @@ void updateVic(uint32_t clkCount) {
 
 
 
-    raster = (clkCount / (63+addOfY)) % PAL_B_MAX_RASTER;
+    raster = (clkCount / 63) % PAL_B_MAX_RASTER;
 
-    rasterXpos = clkCount % (63+addOfY);
+    rasterXpos = clkCount % 63;
 
-    if (rasterXpos<50) { 
         vicRegisters.rasterLine = raster & 0xff;
         if (raster & 0x100) {
             vicRegisters.control1 |= 0x10;
         } else {
             vicRegisters.control1 &= ~0x80;
         }            
+
+        if (raster == (vicRegisters.rasterCMP)) { 
+            uint8_t help = vicRegisters.borderColor;
+#if 0            
+            vicRegisters.borderColor = RED;            
+            drawBoarderLine(raster);
+            vicRegisters.borderColor = help;
+#endif            
+            //printf("raster %04d\n",raster);
+            if (raster == 197) show = 1;
+
+            if (vicRegisters.irqMask & 0x01) {                
+                vicRegisters.irqStatus = 0x81;
+                doIRQ=1;
+            }           
+        }
+
+
+
+    if (rasterXpos<40+addOfY) { 
         return;
     }
 
 
     if  (oldRaster != raster) {
 
+
+#if 0
         if ((raster==0) && (startPrintRaster==1)) {
            startPrintRaster=2; 
         }
@@ -402,30 +525,31 @@ void updateVic(uint32_t clkCount) {
         if ((raster==(PAL_B_MAX_RASTER-1)) && (startPrintRaster==2)) {
            startPrintRaster=0; 
         }
-
+#endif
 
         startTsc = rdtsc();
-        if ((raster>=0) && (raster<PAL_B_Y) ){ // die erste Textzeile beginnt bei 51 ; während für den  rahmen nur 40 Zeile gewählt wurden
+       //  if ((raster>=0) && (raster<PAL_B_Y) ){ } // die erste Textzeile beginnt bei 51 ; während für den  rahmen nur 40 Zeile gewählt wurden
+        
+        if ((raster>=51) && (raster<=250) ) {
             drawCharLine(raster);
-            updateSpriteLine(raster);
-            drawBoarderLine(raster);
         }
-
+        if ((raster>=16) && (raster<=299)) {
+            updateSpriteLine(raster);
+            // drawBoarderLine(raster);
+        }
+        
+#if 0 
+        if ((raster>=51) && (raster<=250) ) {
+            // if ((raster+%8)==0) {
+            if ((vicRegisters.control1 & 0x07) == (raster & 0x07)) {
+                for (int i=0;i<20;i++) windowsScreen[raster][i+30]=YELLOW;
+            }
+        }
+#endif
         endTsc = rdtsc();
         uint64_t cntTsc = endTsc - startTsc;
         gesTsc =  gesTsc + cntTsc;
 
-
-        if (raster == (vicRegisters.rasterCMP)) { 
-            uint8_t help = vicRegisters.borderColor;
-            vicRegisters.borderColor = RED;
-            drawBoarderLine(raster-(RASTER_OFFSET));
-            vicRegisters.borderColor = help;
-            if (vicRegisters.irqMask & 0x01) {                
-                vicRegisters.irqStatus = 0x81;
-                doIRQ=1;
-            }           
-        }
 
         if (raster == (PAL_B_MAX_RASTER-1)) {             
             vicUpdateCnt++;

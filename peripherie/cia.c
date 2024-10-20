@@ -710,7 +710,6 @@ void updateAic(uint8_t clkCount) {
     if (portKeyMap.lifeTime>0) {
         portKeyMap.lifeTime -= clkCount;        
     }
-
 }
 
 uint8_t ciaGetvidoebank(void) {

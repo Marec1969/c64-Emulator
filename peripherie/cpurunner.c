@@ -53,6 +53,7 @@ void loadRom() {
     }
     for (int i=0;i<CHAR_ROM_LEN;i++) {
         rom[CHAR_ROM_ADDR+i] = characters[i];
+        // memory[CHAR_ROM_ADDR+i] = characters[i];
     }
     cpu.PC = (readMemory(0XFFFC) | (readMemory(0XFFFD) << 8));  // Reset Vector    
 }
@@ -126,24 +127,25 @@ int showHelp=0;
 
         if (doIRQ) {
             if (triggerIrq()) { 
-                if (show) {
-                    showHelp = show;
-                    show=0;
-                }
                 irqCnt++;
                 doIRQ = 0;                
                 OPCODE = readMemory(cpu.PC);
+                if (show) showHelp = 30;
                 // printf("rd %04x  %02x\t%d\n",cpu.PC,OPCODE,run);
             }
         }
 
         run++;
         
+        
+        if((cpu.PC >= 0x13a) && (cpu.PC <= 0x143)) {
+        // if (show) showHelp = 10;
+           
+        }
+
         if(showHelp) {        
             showHelp--;
-            if (show==0) mainStop();
-//        if (run>600000) {
-//        if (cpu.SR & 0x08) {
+             // if (show==0) mainStop();
 // printf("%06d\t",run);
             switch(opcodeLengths[OPCODE]) {
                 case 0:

@@ -89,6 +89,7 @@
 #define BR_RIGHT  (400-40)
 #define BR_BOTTOM (SCREEN_HEIGT + BR_TOP) 
 
+#define C64BITMAP (0x20)
 
 typedef struct {
     // $D000: Sprite 0 X-Position (siehe auch $D010)

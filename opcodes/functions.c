@@ -26,33 +26,53 @@ int getFlag(uint8_t flag) {
     return (cpu.SR & flag) ? 1 : 0;
 }
 
+extern int show;
+extern int useStick;
 
 
 // Speicherzugriff
 uint8_t readMemory(uint16_t addr) {
 
-    if ( (addr >= 0xD000 ) && (addr<0xE000) ) {        
-        if ((memory[1] & 0x04)==0x04) {
-            if ((addr >= 0xD000 ) && (addr<=0xD030)) {
-               // printf("rd VIC %04x %02x\r\n",addr,readVic(addr));
-                return (readVic(addr));
-            } 
-            if ((addr >= CIA1ADDR ) && (addr<=CIA1END)) {
-                  // printf("rd cia1 %04x  %02x\r\n",addr,readCia1(addr));
-                 return (readCia1(addr));
-            } 
-            if ((addr >= CIA2ADDR ) && (addr<=CIA2END)) {
-                 // printf("rd cia2 %04x  %02x\r\n",addr,readCia2(addr));
-                 return (readCia2(addr));
-            } 
-            if ((addr >= COLOR_ADDR ) && (addr<=COLOR_ADDR_END)) {
-                 // printf("rd cia2 %04x  %02x\r\n",addr,readCia2(addr));
-                 return (colormap[addr-COLOR_ADDR]);
-            } 
 
-            return (rom[addr]);
-        } 
+        if ((addr >= 0xDe00 ) && (addr <= 0xE000 )) { // && (useStick)) {
+            // printf("rd  %04x mm %02x PC=%04X\n",addr,memory[1],cpu.PC);
+            
+            // value = characters[addr -0x1800];
+             // show = 100;
+        }
 
+
+    if ( (addr >= 0xD000 ) && (addr<0xE000) ) {     
+
+        if (addr == 0xD100) {
+           //  printf("read %04x sw=%02X\n",addr,memory[1]);
+        }
+
+        if (memory[1] & 0x07) { // nur wenn beiden Bit 0,1 und 2 Low dann RAM nutzen
+            if ((memory[1] & 0x04)==0x04) {
+                if ((addr >= 0xD000 ) && (addr<=0xD030)) {
+                // printf("rd VIC %04x %02x\r\n",addr,readVic(addr));
+                    return (readVic(addr));
+                } 
+                if ((addr >= CIA1ADDR ) && (addr<=CIA1END)) {
+                    // printf("rd cia1 %04x  %02x\r\n",addr,readCia1(addr));
+                    return (readCia1(addr));
+                } 
+                if ((addr >= CIA2ADDR ) && (addr<=CIA2END)) {
+                    // printf("rd cia2 %04x  %02x\r\n",addr,readCia2(addr));
+                    return (readCia2(addr));
+                } 
+                if ((addr >= COLOR_ADDR ) && (addr<=COLOR_ADDR_END)) {
+                    // printf("rd cia2 %04x  %02x\r\n",addr,readCia2(addr));
+                    return (colormap[addr-COLOR_ADDR]);
+                } 
+
+                return (rom[addr]); // ist nicht ganz richting , da sich die oberen adressen wiederholen
+            } else {
+                return (characters[addr-CHAR_ROM_ADDR]);
+            }
+        }
+        return memory[addr];
     }
 
     if ( (addr >= 0xA000 ) && (addr<0xc000) ) {
@@ -70,28 +90,39 @@ uint8_t readMemory(uint16_t addr) {
     return memory[addr];
 }
 
+
 void writeMemory(uint16_t addr,uint8_t value) {
 
+/*
+        if (show) {
+            printf("%04x\t%02x\n",addr,value);
+        }
+*/
 
     if ( (addr >= 0xD000 ) && (addr<0xE000) ) {
-        if ((memory[1] & 0x04)==0x04) {
-            if ((addr >= 0xD000 ) && (addr<=0xD030)) {
-                writeVic(addr,value);
-                // printf("WR VIC %04x  %04x\r\n",addr,value);
-            } 
-            if ((addr >= CIA1ADDR ) && (addr<=CIA1END)) {
-                writeCia1(addr,value);
-                // printf("WR cia1 %04x  %02x  pc %04x\r\n",addr,value,cpu.PC);
-            } 
-            if ((addr >= CIA2ADDR ) && (addr<=CIA2END)) {
-                writeCia2(addr,value);
-                // printf("WR cia2 %04x  %02x\r\n",addr,value);
-            } 
-            if ((addr >= COLOR_ADDR ) && (addr<=COLOR_ADDR_END)) {
-                 // printf("rd cia2 %04x  %02x\r\n",addr,readCia2(addr));
-                 colormap[addr-COLOR_ADDR]=value;
-            } 
-            return;
+        if (memory[1] & 0x03) { // nur wenn beiden Bit 0 und 1 Low dann RAM nutzen
+            if ((memory[1] & 0x04)==0x04) {
+                if ((addr >= 0xD000 ) && (addr<=0xD030)) {
+                    writeVic(addr,value);
+                    if (addr != 0xd019) {
+                     // printf("WR VIC %04x  %04x\r\n",addr,value);
+
+                    }
+                } 
+                if ((addr >= CIA1ADDR ) && (addr<=CIA1END)) {
+                    writeCia1(addr,value);
+                    // printf("WR cia1 %04x  %02x  pc %04x\r\n",addr,value,cpu.PC);
+                } 
+                if ((addr >= CIA2ADDR ) && (addr<=CIA2END)) {
+                    writeCia2(addr,value);
+                    // printf("WR cia2 %04x  %02x   memTab %02x\r\n",addr,value,memory[1]);
+                } 
+                if ((addr >= COLOR_ADDR ) && (addr<=COLOR_ADDR_END)) {
+                    // printf("rd cia2 %04x  %02x\r\n",addr,readCia2(addr));
+                    colormap[addr-COLOR_ADDR]=value;
+                } 
+                return;
+            }
         }
     }
 
@@ -104,6 +135,7 @@ void writeMemory(uint16_t addr,uint8_t value) {
     }
     memory[addr] = value;
 }
+
 
 
 uint16_t addrImmediate(void) {

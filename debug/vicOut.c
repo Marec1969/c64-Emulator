@@ -207,6 +207,23 @@ int saveScreen() {
         }
          fprintf(filePointer,"\n");
     }
+
+    fprintf(filePointer,"\n\n\n\n");
+
+    cnt = 0x4400;
+    for (int i=0;i<25;i++) {
+        for (int j=0;j<40;j++) {
+            if (memory[cnt]>31) {
+                fprintf(filePointer,"%c",memory[cnt]);
+            } else {
+                fprintf(filePointer,"%c",memory[cnt]+'A'-1);
+            }
+            cnt++;
+        }
+         fprintf(filePointer,"\n");
+    }
+
+
     // Datei schließen
     fclose(filePointer);
 
