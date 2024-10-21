@@ -25,29 +25,30 @@ void keyMapDown(int ascii,int rawKey) {
 
     if ((rawKey>=116) && (rawKey<124)) {
         switch(rawKey) {
-            case 116:
+            case 116:  // F5
                 addOfY--;
                 printf("Offset = %d\n",addOfY);
                 break;
-            case 117:
+            case 117: // F6
                 addOfY++;
                 printf("Offset = %d\n",addOfY);
                 break;
-            case 118:
+            case 118: // F8
                  show = 1 - show;
 //                startPrintRaster=1;
                 break;
-            case 119:
+            case 119: // F9
                 slowdown=1-slowdown;
                 break;
-            case 123:
+            case 123: // F12
                 // loadFlaschbier();
 //                loadNeptun();  
                  loadChopli();
+                 // loadGhost();
                 break;
-            case 122:
+            case 122: // F11
                 // loadNeptun();                
-                loadGhost();
+                loadDino();
                 break;                
             case 120:
                     useStick = 1 - useStick;

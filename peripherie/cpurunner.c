@@ -52,7 +52,7 @@ void loadRom() {
         rom[CORE_ROM_ADDR+i] = prom[BASIC_ROM_LEN + i];
     }
     for (int i=0;i<CHAR_ROM_LEN;i++) {
-        rom[CHAR_ROM_ADDR+i] = characters[i];
+       //  rom[CHAR_ROM_ADDR+i] = characters[i];
         // memory[CHAR_ROM_ADDR+i] = characters[i];
     }
     cpu.PC = (readMemory(0XFFFC) | (readMemory(0XFFFD) << 8));  // Reset Vector    
@@ -69,11 +69,11 @@ void  cpuRunnerInit() {
     run = 0;
 }
 
+uint32_t clkCount=0;
 
 void cpuRunnerDo(void) {
 uint8_t OPCODE;
 static  int oldptr;
-static uint32_t clkCount=0;
 int run = 0;
 int irqCnt=0;
 int showHelp=0;
@@ -128,6 +128,7 @@ int showHelp=0;
         if (doIRQ) {
             if (triggerIrq()) { 
                 irqCnt++;
+                // printf("irq quelle %d\n",doIRQ);
                 doIRQ = 0;                
                 OPCODE = readMemory(cpu.PC);
                 if (show) showHelp = 30;

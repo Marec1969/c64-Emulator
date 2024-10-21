@@ -135,6 +135,8 @@ void writeCia1(uint16_t adresse,uint8_t value) {
                       // Bit 7: Echtzeituhr, 0 = 60 Hz, 1 = 50 Hz an Pin 19
             if (value & 0x01) {
                 ciaTimer_ctrl |= TIMERA1_RUN;
+            } else {
+                ciaTimer_ctrl &= ~TIMERA1_RUN;
             }
             if (value & 0x08) {
                 ciaTimer_ctrl &= ~TIMERA1_RELOAD;
@@ -166,7 +168,10 @@ void writeCia1(uint16_t adresse,uint8_t value) {
                       // Bit 7: 0 = Schreiben in die TOD-Register setzt die Uhrzeit, 1 = Schreiben in die TOD-Register setzt die Alarmzeit
             if (value & 0x01) {
                 ciaTimer_ctrl |= TIMERB1_RUN;
+            } else {
+                ciaTimer_ctrl &= ~TIMERB1_RUN;
             }
+
             if (value & 0x08) {
                 ciaTimer_ctrl &= ~TIMERB1_RELOAD;
             } else {
@@ -300,7 +305,9 @@ void writeCia2(uint16_t adresse,uint8_t value) {
                       // Bit 7: Echtzeituhr, 0 = 60 Hz, 1 = 50 Hz an Pin 19
             if (value & 0x01) {
                 ciaTimer_ctrl |= TIMERA2_RUN;
-            }
+            } else {
+                ciaTimer_ctrl &= ~TIMERA2_RUN;
+            }            
             if (value & 0x08) {
                 ciaTimer_ctrl &= ~TIMERA2_RELOAD;
             } else {
@@ -331,7 +338,9 @@ void writeCia2(uint16_t adresse,uint8_t value) {
                       // Bit 7: 0 = Schreiben in die TOD-Register setzt die Uhrzeit, 1 = Schreiben in die TOD-Register setzt die Alarmzeit
             if (value & 0x01) {
                 ciaTimer_ctrl |= TIMERB2_RUN;
-            }
+            } else {
+                ciaTimer_ctrl &= ~TIMERB2_RUN;
+            }            
             if (value & 0x08) {
                 ciaTimer_ctrl &= ~TIMERB2_RELOAD;
             } else {
@@ -649,7 +658,7 @@ void updateAic(uint8_t clkCount) {
             cia1.timerA -= clkCount;
             if (cia1.timerA<=0) {
                 if (cia1.icrMask & 0x01) {
-                    doIRQ = 1;           
+                    doIRQ = 2;           
                     cia1.icr |= 0x81;     
                 }
                 if (ciaTimer_ctrl & TIMERA1_RELOAD ) {
@@ -664,7 +673,7 @@ void updateAic(uint8_t clkCount) {
             cia1.timerB -= clkCount;
             if (cia1.timerB<=0) {
                 if (cia1.icrMask & 0x02) {
-                    doIRQ = 1;           
+                    doIRQ = 2;           
                     cia1.icr |= 0x82;     
                 }
                 if (ciaTimer_ctrl & TIMERB1_RELOAD ) {
@@ -679,7 +688,7 @@ void updateAic(uint8_t clkCount) {
             cia2.timerA -= clkCount;
             if (cia2.timerA<=0) {
                 if (cia2.icrMask & 0x01) {
-                    doIRQ = 1;           
+                    doIRQ = 2;           
                     cia2.icr |= 0x81;     
                 }
                 if (ciaTimer_ctrl & TIMERA2_RELOAD ) {
@@ -694,7 +703,7 @@ void updateAic(uint8_t clkCount) {
             cia2.timerB -= clkCount;
             if (cia2.timerB<=0) {
                 if (cia2.icrMask & 0x02) {
-                    doIRQ = 1;           
+                    doIRQ = 2;           
                     cia2.icr |= 0x82;     
                 }
                 if (ciaTimer_ctrl & TIMERB2_RELOAD ) {

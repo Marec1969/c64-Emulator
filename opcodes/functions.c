@@ -26,21 +26,18 @@ int getFlag(uint8_t flag) {
     return (cpu.SR & flag) ? 1 : 0;
 }
 
-extern int show;
 extern int useStick;
+extern int16_t rasterXpos;
+extern uint32_t raster;
+extern int addOfY;
+extern int startPrintRaster;
+extern int slowdown;
+extern int show;
+extern uint32_t clkCount;
 
 
 // Speicherzugriff
 uint8_t readMemory(uint16_t addr) {
-
-
-        if ((addr >= 0xDe00 ) && (addr <= 0xE000 )) { // && (useStick)) {
-            // printf("rd  %04x mm %02x PC=%04X\n",addr,memory[1],cpu.PC);
-            
-            // value = characters[addr -0x1800];
-             // show = 100;
-        }
-
 
     if ( (addr >= 0xD000 ) && (addr<0xE000) ) {     
 
@@ -92,6 +89,23 @@ uint8_t readMemory(uint16_t addr) {
 
 
 void writeMemory(uint16_t addr,uint8_t value) {
+
+#if 0
+    if ((addr >= 0xD000 ) && (addr <= 0xE000 )) { 
+
+        if ((raster >= 214) && (raster <= 240) && (slowdown)) {
+            if(addr <= 0xd010) {
+            //            printf("%04X\t%02x->%02x\t%3d\t%3d\n",addr,*ptr , val ,rasterXpos,raster);
+            printf("%04X\t%d\t\t%3d\t%3d\n",addr,value,rasterXpos,raster);
+            }
+        }
+        
+        if ((raster == 240) && (slowdown)) {
+        printf("\n");
+        }
+    }
+#endif    
+
 
 /*
         if (show) {

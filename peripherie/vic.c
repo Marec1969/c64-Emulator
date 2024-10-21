@@ -44,11 +44,18 @@ uint64_t gesTsc=0;
 static uint64_t endTsc = 0;
 static uint64_t startTsc = 0;
 
+int16_t rasterXpos;
+uint32_t raster;
 
+
+extern int useStick;
+extern int16_t rasterXpos;
+extern uint32_t raster;
 extern int addOfY;
 extern int startPrintRaster;
 extern int slowdown;
 extern int show;
+extern uint32_t clkCount;
 
 
 void printBits(unsigned char num) {
@@ -63,12 +70,15 @@ void printBits(unsigned char num) {
 void writeVic(uint16_t addr,uint8_t value) {
     uint8_t *ptr =  (uint8_t *) &vicRegisters;
 
+    ptr +=  (addr - 0xd000);
 
 /*
-    if (addr == 0xD018) {
-        printf("%04X\t",addr);
-        printBits(value);
-        printf("\n");
+
+
+    if (raster>206) {
+        printf("%04X  %3d   %3d\n",addr,value,raster%(63+addOfY));
+        //printBits(value);
+        //printf("\n");
 
     }
 
@@ -110,7 +120,7 @@ void writeVic(uint16_t addr,uint8_t value) {
 
     if (addr == 0xD019) {
         // printf("VIC Set IQR %02x\n",value);
-        // if (doIRQ) printf("Auchtung  !!!!!!!! VIC Set IQR %02x\n",value);
+        // if (doIRQ) printf("Set IQR %02x:%02x at %3d\n",value,doIRQ,raster);
         vicRegisters.irqStatus &=  ~value;
         if ((vicRegisters.irqStatus &0x07)==0) {
             vicRegisters.irqStatus = 0;
@@ -119,7 +129,7 @@ void writeVic(uint16_t addr,uint8_t value) {
         return;
     }    
 
-    ptr +=  (addr - 0xd000);
+
     *ptr = value;
 }
 
@@ -128,7 +138,6 @@ uint8_t readVic(uint16_t addr) {
     uint8_t val;
 
     ptr +=  (addr - 0xd000);
-
     val  = *ptr;
 
     if (addr == 0xD01E) {
@@ -242,13 +251,14 @@ static inline void drawMulticolorGrafik(uint8_t fgColorxx, uint8_t fgColor11, ui
 
 
 static inline uint8_t* getCharBasePtr(uint8_t bank, uint16_t addr, uint16_t bankOffset) {    
+extern uint8_t characters[];
 
     if ((bank == 0) || (bank == 2)) {
         if (addr == 0x1000) {
-            return &rom[CHAR_ROM_ADDR]; 
+            return &characters[0]; //  &rom[CHAR_ROM_ADDR]; 
         }
         if (addr == 0x1800) {
-            return &rom[CHAR_ROM_ADDR+0x800]; 
+            return &characters[0x800]; // &rom[CHAR_ROM_ADDR+0x800]; 
         }
     }
         
@@ -286,12 +296,13 @@ void drawCharLine(uint16_t raster) {
         }
         bitRow = raster;
         charYPos = 0;
+        // clkCount += 20; // ca 20 Taktzykeln ausgelassen
     } else {
         bitRow++;
         charYPos++;
     }
 
-    if ((vicRegisters.control1 & (EXTENDEDBACKCOLOR | C64BITMAP)) == (EXTENDEDBACKCOLOR | C64BITMAP)) {
+    if ((vicRegisters.control1 & (EXTENDEDBACKCOLOR | C64BITMAP)) == (EXTENDEDBACKCOLOR | C64BITMAP)) { // toDo: ist wohl falsch -hier muss nur die Zeile in Schwarz gemacht werden 
         for (int col = 0; col < GRID_WIDTH; col++) {
             uint8_t character = 0;
             uint8_t fgColor = 0;
@@ -506,33 +517,29 @@ void updateSpriteLine(int16_t rasterPosY) {
 
 
 
-void updateVic(uint32_t clkCount) {
+void updateVic(uint32_t clkCountS) {
     static uint32_t oldRaster;
-    uint32_t raster;
-    int16_t rasterXpos;
+    
 
 
+    raster = (clkCountS / (63)) % PAL_B_MAX_RASTER;
 
-    raster = (clkCount / 63) % PAL_B_MAX_RASTER;
-
-    rasterXpos = clkCount % 63;
+    rasterXpos = clkCountS % (63);
 
         vicRegisters.rasterLine = raster & 0xff;
         if (raster & 0x100) {
-            vicRegisters.control1 |= 0x10;
+            vicRegisters.control1 |= 0x10; // ist eigentlich falsch 
         } else {
             vicRegisters.control1 &= ~0x80;
         }            
 
-        if (raster == (vicRegisters.rasterCMP)) { 
-            uint8_t help = vicRegisters.borderColor;
-#if 0            
-            vicRegisters.borderColor = RED;            
-            drawBoarderLine(raster);
-            vicRegisters.borderColor = help;
+        if (raster == vicRegisters.rasterCMP)  { 
+#if 0
+                uint8_t help = vicRegisters.borderColor;
+                vicRegisters.borderColor = YELLOW;            
+                drawBoarderLine(raster);
+                vicRegisters.borderColor = help;
 #endif            
-            //printf("raster %04d\n",raster);
-            // if (raster == 197) show = 1;
 
             if (vicRegisters.irqMask & 0x01) {                
                 vicRegisters.irqStatus = 0x81;
@@ -540,33 +547,23 @@ void updateVic(uint32_t clkCount) {
             }           
         }
 
-
-
-    if (rasterXpos<40+addOfY) { 
-        return;
-    }
-
-
-    if  (oldRaster != raster) {
-
-
 #if 0
-        if ((raster==0) && (startPrintRaster==1)) {
-           startPrintRaster=2; 
-        }
 
-        if (startPrintRaster==2) {
-           printf("R= %d\n",vicRegisters.rasterCMP); 
-        }
+            if ((raster >= 214) && (raster <= 240)) {
+                uint8_t help = vicRegisters.borderColor;
+                vicRegisters.borderColor = RED;            
+                drawBoarderLine(raster);
+                vicRegisters.borderColor = help;
+
+            }
+#endif            
 
 
-        if ((raster==(PAL_B_MAX_RASTER-1)) && (startPrintRaster==2)) {
-           startPrintRaster=0; 
-        }
-#endif
+
+
+    if  ((oldRaster != raster)  && (rasterXpos>40)) {
 
         startTsc = rdtsc();
-       //  if ((raster>=0) && (raster<PAL_B_Y) ){ } // die erste Textzeile beginnt bei 51 ; während für den  rahmen nur 40 Zeile gewählt wurden
         
         if ((raster>=51) && (raster<=250) ) {
             drawCharLine(raster);
@@ -575,7 +572,17 @@ void updateVic(uint32_t clkCount) {
             updateSpriteLine(raster);
             drawBoarderLine(raster);
         }
-        
+
+/*
+        if ((raster==214) && (slowdown)) {
+            printf("\n------------------------------- \n");
+        }
+
+        if ((raster>=214) && (raster<=240) && (slowdown)) {
+            printf("--- \t\t%3d\t%3d\n",rasterXpos,raster);
+        }
+*/
+
 #if 0 
         if ((raster>=51) && (raster<=250) ) {
             // if ((raster+%8)==0) {
@@ -584,28 +591,25 @@ void updateVic(uint32_t clkCount) {
             }
         }
 #endif
+
         endTsc = rdtsc();
         uint64_t cntTsc = endTsc - startTsc;
         gesTsc =  gesTsc + cntTsc;
-
 
         if (raster == (PAL_B_MAX_RASTER-1)) {             
             vicUpdateCnt++;
             windowsUpdateScreen(&windowsScreen[0][0]);
             if (slowdown) {
-                  Sleep(200);
+                  Sleep(500);
             }
             if ((vicUpdateCnt%2)==0) {
                 Sleep(10);
             } else {
                 Sleep(10);
             }
-    
-
-          // printf("rast %d  %x\n",cnt,windowHandle);
         }
+        oldRaster = raster;
     }
-    oldRaster = raster;
     
 }
 
