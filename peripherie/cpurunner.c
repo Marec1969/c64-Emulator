@@ -70,6 +70,7 @@ void  cpuRunnerInit() {
 }
 
 uint32_t clkCount=0;
+uint32_t clkCount1=0;
 
 void cpuRunnerDo(void) {
 uint8_t OPCODE;
@@ -88,11 +89,23 @@ int showHelp=0;
     // uint64_t startTsc = rdtsc();
 #endif 
 
+    for(int i=0;i<256;i++) {
+        // printf("Opcode %s\t%02X\t%d\n",opcodes[i],i,opcodeCycles[i]);
+    }
+
+
     while (1) {
         oldptr = cpu.PC;
         OPCODE = readMemory(cpu.PC);
         updateAic(opcodeCycles[OPCODE]);
-        clkCount += opcodeCycles[OPCODE];        
+        clkCount1 += opcodeCycles[OPCODE];    
+        clkCount += arr[OPCODE];    
+        if (arr[OPCODE]==0) {
+            printf("%02X exit\n",OPCODE);
+            exit(1);
+        }
+
+            
         updateVic(clkCount);
 
        // delayCNT();
@@ -110,6 +123,7 @@ int showHelp=0;
             printf("TSC-Differenz: %3.3f Zyklen\n", (double)(gesTsc)*0.4e-9*0.45);
 
             printf("Ende at %d   time %3.2fS   irq Cnt=%d\r\n",run,(double)clkCount * 1e-6,irqCnt);
+            printf("Ende at %d  : %d\n",clkCount,clkCount1);
 
             {
                 extern volatile int vicUpdateCnt;

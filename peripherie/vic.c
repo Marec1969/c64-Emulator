@@ -106,6 +106,11 @@ void writeVic(uint16_t addr,uint8_t value) {
         // printf("Set high %02X to %d\n",value,vicRegisters.rasterCMP);
     }
 
+#if 0
+    if (addr == 0xD016) {        
+      printf("Set control2 %3d   %02X   %02X\n",raster,value,vicRegisters.control2);
+    }
+#endif
 
     if (addr == 0xD018) {        
         vicRegisters.memoryControl = value;
@@ -139,7 +144,14 @@ uint8_t readVic(uint16_t addr) {
 
     ptr +=  (addr - 0xd000);
     val  = *ptr;
-
+/*
+    if (addr == 0xD011) {
+        printf("ctrl %3d : %02x  %02x\n",raster,vicRegisters.rasterLine,vicRegisters.control1&0x80);
+    }
+    if (addr == 0xD012) {
+        printf("rast %3d : %02x  %02x\n",raster,vicRegisters.rasterLine,vicRegisters.control1&0x80);
+    }
+*/
     if (addr == 0xD01E) {
          // printf("VIC spriteCollision IQR %02x\n",vicRegisters.spriteCollision);
          val = vicRegisters.spriteCollision;
@@ -522,19 +534,32 @@ void updateVic(uint32_t clkCountS) {
     
 
 
-    raster = (clkCountS / (63)) % PAL_B_MAX_RASTER;
+    raster = (clkCountS / (63)) % PAL_B_MAX_RASTER; // wir brauche offendsichtlich 2 Zyklen mehr ???
 
     rasterXpos = clkCountS % (63);
 
-        vicRegisters.rasterLine = raster & 0xff;
-        if (raster & 0x100) {
-            vicRegisters.control1 |= 0x10; // ist eigentlich falsch 
+
+#if 1       
+        int help = raster ;
+        vicRegisters.rasterLine = help & 0xff;
+        if (help & 0x100) {
+            vicRegisters.control1 |= 0x80; 
         } else {
             vicRegisters.control1 &= ~0x80;
-        }            
+        }  
+#else 
+        vicRegisters.control1 = (vicRegisters.control1 & 0x7f) | ((raster>>1) & 0x80);
+
+#endif
+
 
         if (raster == vicRegisters.rasterCMP)  { 
-#if 0
+
+        if (((vicRegisters.rasterLine | (vicRegisters.control1 & 0x80)<<1)) != vicRegisters.rasterCMP) {
+            // printf("Hilfe raster control nicht syncron  %3d != %3d\n",((vicRegisters.rasterLine | (vicRegisters.control1 & 0x80)<<1)),vicRegisters.rasterCMP);
+        } 
+
+#if 1
                 uint8_t help = vicRegisters.borderColor;
                 vicRegisters.borderColor = YELLOW;            
                 drawBoarderLine(raster);
@@ -547,16 +572,6 @@ void updateVic(uint32_t clkCountS) {
             }           
         }
 
-#if 0
-
-            if ((raster >= 214) && (raster <= 240)) {
-                uint8_t help = vicRegisters.borderColor;
-                vicRegisters.borderColor = RED;            
-                drawBoarderLine(raster);
-                vicRegisters.borderColor = help;
-
-            }
-#endif            
 
 
 
@@ -596,14 +611,27 @@ void updateVic(uint32_t clkCountS) {
         uint64_t cntTsc = endTsc - startTsc;
         gesTsc =  gesTsc + cntTsc;
 
+
+#if 1
+
+            if ((raster >= 238) && (raster <= 247)) {
+                uint8_t help = vicRegisters.borderColor;
+                vicRegisters.borderColor = RED;            
+                drawBoarderLine(raster);
+                vicRegisters.borderColor = help;
+
+            }
+#endif            
+
+
         if (raster == (PAL_B_MAX_RASTER-1)) {             
             vicUpdateCnt++;
             windowsUpdateScreen(&windowsScreen[0][0]);
             if (slowdown) {
                   Sleep(500);
             }
-            if ((vicUpdateCnt%2)==0) {
-                Sleep(10);
+            if ((vicUpdateCnt%3)==0) {
+                Sleep(20);
             } else {
                 Sleep(10);
             }

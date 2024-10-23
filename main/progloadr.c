@@ -94,8 +94,6 @@ void loadGhost() {
 }
 
 
-
-
 void loadChopli() {
     int i;    
 
